@@ -13,7 +13,24 @@ class DynamicTestingApplication:
         self.on_perform = lambda app_controller: None
         self.setup_folder()
         self.device_controller = DeviceController(udid)
-        print(self.device_controller.is_online())
+
+    def __debug(self, app_controller: AppController):
+        print('Entering debug mode')
+        while True:
+            inp = input().strip()
+            if inp in ["q", "quit"]:
+                break
+            elif inp in ["s", "source"]:
+                source = app_controller.get_page_source()
+                print(source)
+            elif inp in ["h", "help"]:
+                print("Press q to exit")
+            elif inp in ["hq"]:
+                print("Highlevel query")
+                method = input("Method to be called: ")
+                print(getattr(app_controller.highlevel_query, method)())
+            else:
+                print("Command", inp, "not found")
 
     def setup_folder(self):
         os.system("mkdir log")
@@ -36,17 +53,23 @@ class DynamicTestingApplication:
     def set_action_count(self, action_count):
         self.action_count = action_count
 
-    def test(self, apk_path, action_count=10, install=True):
+    def test(self, apk_path, action_count=10, install=True, debug=False, activity=None):
         if not self.device_controller.is_online():
             raise Exception('The testing device is offine')
 
+        extended_desired_cap = self.desired_cap
         if install:
+            extended_desired_cap["app"] = apk_path
             self.device_controller.install_apk(apk_path)
 
-        app_controller = AppController(self.desired_cap, apk_path)
+        app_controller = AppController(
+            extended_desired_cap, apk_path, activity)
 
         if hasattr(self, 'action_count'):
             action_count = self.action_count
 
-        for i in range(action_count):
-            self.on_perform(app_controller)
+        if debug:
+            self.__debug(app_controller)
+        else:
+            for i in range(action_count):
+                self.on_perform(app_controller)

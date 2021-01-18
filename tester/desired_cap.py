@@ -5,7 +5,7 @@ class AndroidDesiredCapabilities:
             "platformName": "Android",
             "udid": udid,
             "version": version,
-            "app": "##apk_path##",
+            # "app": "##apk_path##",
             "autoGrantPermissions": True,
             "androidInstallTimeout": 90000,
             "uiautomator2ServerInstallTimeout": 90000,

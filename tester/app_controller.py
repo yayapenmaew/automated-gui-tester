@@ -4,19 +4,26 @@ import time
 import random
 from appium import webdriver
 from appium.webdriver.common.touch_action import TouchAction
-
+from .highlevel_query import HighlevelQuery
 
 class AppController:
-    def __init__(self, desired_cap, apk_path):
-        desired_cap['app'] = apk_path
+    def __init__(self, desired_cap, apk_path, activity=None):
         self.desired_cap = desired_cap
         self.appium_port = desired_cap['appiumPort']
         self.package_name = path.splitext(path.basename(apk_path))[0]
+        self.desired_cap['appPackage'] = self.package_name
+        if activity:
+            self.desired_cap['appActivity'] = activity
+
         self.__start_appium()
         time.sleep(2)
         self.connect_driver()
         self.launch_app()
         self.package_name = self.get_current_package()
+
+        self.highlevel_query = HighlevelQuery(self.driver)
+
+        print(self.package_name)
 
     def __del__(self):
         self.__kill_appium()
@@ -63,3 +70,6 @@ class AppController:
         x, y = width * x_percent / 100, height * y_percent / 100
 
         TouchAction(self.driver).press(x=x, y=max(100, y)).perform()
+
+    def get_page_source(self):
+        return self.driver.page_source
