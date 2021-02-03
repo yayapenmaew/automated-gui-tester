@@ -6,6 +6,7 @@ from appium import webdriver
 from appium.webdriver.common.touch_action import TouchAction
 from .highlevel_query import HighlevelQuery
 
+
 class AppController:
     def __init__(self, desired_cap, apk_path, activity=None):
         self.desired_cap = desired_cap
@@ -19,6 +20,7 @@ class AppController:
         time.sleep(2)
         self.connect_driver()
         self.launch_app()
+        time.sleep(5)
         self.package_name = self.get_current_package()
 
         self.highlevel_query = HighlevelQuery(self.driver)
@@ -70,6 +72,36 @@ class AppController:
         x, y = width * x_percent / 100, height * y_percent / 100
 
         TouchAction(self.driver).press(x=x, y=max(100, y)).perform()
+
+    def swipe(self, dir='left', duration=400):
+        assert dir in ['left', 'right', 'down', 'up']
+        width, height = self.get_window_size()
+        if dir == 'down':
+            try:
+                self.driver.swipe(width/2, height/2, width/2, height/4, duration)
+            except:
+                self.driver.swipe(height/2, width/2, height/2, width/4, duration)
+        elif dir == 'up':
+            try:
+                self.driver.swipe(width/2, height/2, width/2, height*3/4, duration)
+            except:
+                self.driver.swipe(height/2, width/2, height/2, width*3/4, duration)		
+        elif dir == 'right':
+            try:
+                self.driver.swipe(width/2, height/2, width*3/4, height/2, duration)
+            except:
+                self.driver.swipe(height/2, width/2, height/4, width/4, duration)
+        elif dir == 'left':
+            try:
+                self.driver.swipe(width*3/4, height/2, width/2, height/2, duration)
+            except:
+                self.driver.swipe(height/2, width/2, height*3/4, width/4, duration)
+
+    def delay(self, duration=1):
+        time.sleep(duration)
+
+    def back(self):
+        self.driver.back()
 
     def get_page_source(self):
         return self.driver.page_source

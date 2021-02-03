@@ -5,6 +5,7 @@ import operator
 class Widget:
     TEXT_VIEW = "android.widget.TextView"
     EDIT_TEXT = "android.widget.EditText"
+    VIEW_PAGER = "androidx.viewpager.widget.ViewPager"
 
 
 class PageType:
@@ -21,7 +22,6 @@ class HighlevelQuery:
             real_value = element.get_attribute(attr)
 
             if type(value) == re.Pattern:
-                print(real_value)
                 if not value.search(real_value):
                     return False
             else:
@@ -42,13 +42,26 @@ class HighlevelQuery:
         else:
             return elements
 
-    def __has_password_field(self):
-        return len(self.__find_by_classname(Widget.EDIT_TEXT, {"password": True})) > 0
+    def password_field_count(self):
+        return len(self.__find_by_classname(Widget.EDIT_TEXT, {"password": True}))
 
-    def __has_login_with_button(self):
+    def has_login_with_button(self):
         return len(self.__find_by_classname(Widget.TEXT_VIEW, {
             "text": re.compile("(เข้าสู่ระบบ|Login|Continue).*(Facebook|Google|Twitter|Apple|Email)", re.IGNORECASE)
         })) > 0
+
+    def find_all_text_input(self):
+        return self.__find_by_classname(Widget.EDIT_TEXT, { "focusable": True })
+
+    def fill_text_input(self, values):
+        # values = { "email": "test@test.com", "password": "password", "pwd": "password", "pword": "password" }
+        text_inputs = self.find_all_text_input()
+        for text_input in text_inputs:
+            resource_id = text_input.get_attribute("resource-id").lower()
+            for id in values:
+                if id in resource_id:
+                    text_input.click()
+                    text_input.send_keys(values[id])
 
     def page_type(self):
         score = {
@@ -56,13 +69,18 @@ class HighlevelQuery:
             PageType.REGISTER: 0
         }
 
-        if self.__has_password_field():
-            score[PageType.LOGIN] += 1
-        if self.__has_login_with_button():
-            score[PageType.LOGIN] += 1
+        # Count text fields that have password attribute.
+        password_field_count = self.password_field_count()
+        if password_field_count > 1:
+            return PageType.REGISTER
+        elif password_field_count > 0 or self.has_login_with_button():
+            return PageType.LOGIN
 
         # Return PageType with maximum score
-        return max(stats.items(), key=operator.itemgetter(1))[0]
+        return max(score.items(), key=operator.itemgetter(1))[0]
 
     def is_login_page(self):
         return self.__has_password_field
+
+    def found_view_pager(self):
+        return self.__find_by_classname(Widget.VIEW_PAGER)

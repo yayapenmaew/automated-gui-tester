@@ -3,6 +3,7 @@ import os
 from .desired_cap import AndroidDesiredCapabilities
 from .device_controller import DeviceController
 from .app_controller import AppController
+import time
 
 
 class DynamicTestingApplication:
@@ -28,7 +29,10 @@ class DynamicTestingApplication:
             elif inp in ["hq"]:
                 print("Highlevel query")
                 method = input("Method to be called: ")
-                print(getattr(app_controller.highlevel_query, method)())
+                try:
+                    print(getattr(app_controller.highlevel_query, method)())
+                except Exception as err:
+                    print(err)
             else:
                 print("Command", inp, "not found")
 
@@ -72,4 +76,6 @@ class DynamicTestingApplication:
             self.__debug(app_controller)
         else:
             for i in range(action_count):
+                print(i)
                 self.on_perform(app_controller)
+                time.sleep(1)
