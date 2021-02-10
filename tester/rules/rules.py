@@ -1,40 +1,99 @@
 from ..app_controller import AppController
+from ..highlevel_query import Widget
 
 
 '''Rule Interface'''
 
 
 class Rule:
-    def name() -> str:
+    def name(self) -> str:
         pass
 
-    def description() -> str:
+    def description(self) -> str:
         pass
 
-    def match(app_controller: AppController) -> bool:
+    def match(self, app_controller: AppController) -> bool:
         pass
 
-    def action(app_controller: AppController) -> None:
+    def action(self, app_controller: AppController) -> None:
         pass
 
 
 class ViewPagerRule(Rule):
-    def name():
+    def name(self):
         return "Found ViewPager"
 
-    def description():
+    def description(self):
         return "Swipe left 5 times then back"
 
-    def match(app_controller: AppController):
+    def match(self, app_controller: AppController):
         return app_controller.highlevel_query.found_view_pager()
 
-    def action(app_controller: AppController):
+    def action(self, app_controller: AppController):
         for i in range(5):
             app_controller.swipe('left')
             app_controller.delay(1)
         app_controller.back()
 
 
-rules = [
-    ViewPagerRule
-]
+class ImageButtonRule(Rule):
+
+    def name(self):
+        return "Found ImageButton"
+
+    def description(self):
+        return "Click the button once"
+
+    def match(self, app_controller: AppController):
+        buttons = app_controller.highlevel_query.find_by_classname(
+            Widget.IMAGE_BUTTON)
+        return len(buttons)
+
+    def action(self, app_controller: AppController):
+        buttons = app_controller.highlevel_query.find_by_classname(
+            Widget.IMAGE_BUTTON)
+        for button in buttons:
+            button.click()
+            app_controller.delay(1)
+
+
+class ActionBarRule(Rule):
+
+    def __init__(self):
+        self.tabVisited = set()
+        self.finished = False
+
+    def name(self):
+        return "Found ActionBar (Tabs)"
+
+    def description(self):
+        return "Loop through all tabs"
+
+    def match(self, app_controller: AppController):
+        if self.finished:
+            return False
+        tabs = app_controller.highlevel_query.find_by_classname(
+            Widget.ACTION_BAR)
+        return 0 < len(self.tabVisited) < len(tabs) if len(self.tabVisited) else len(tabs)
+
+    def action(self, app_controller: AppController):
+        tabs = app_controller.highlevel_query.find_by_classname(
+            Widget.ACTION_BAR)
+        for tab in tabs:
+            tab_id = tab.get_attribute("resource-id")
+            if tab_id in self.tabVisited:
+                continue
+            tab.click()
+            self.tabVisited.add(tab_id)
+            break
+        if len(tabs) == len(self.tabVisited):
+            self.finished = True
+
+
+def initialize_rules():
+    rules = [
+        ViewPagerRule(),
+        ImageButtonRule(),
+        ActionBarRule(),
+    ]
+    return rules

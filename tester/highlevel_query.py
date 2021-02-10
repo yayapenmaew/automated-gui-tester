@@ -6,7 +6,8 @@ class Widget:
     TEXT_VIEW = "android.widget.TextView"
     EDIT_TEXT = "android.widget.EditText"
     VIEW_PAGER = "androidx.viewpager.widget.ViewPager"
-
+    IMAGE_BUTTON = "android.widget.ImageButton"
+    ACTION_BAR = "android.app.ActionBar$Tab"
 
 class PageType:
     LOGIN = "LOGIN"
@@ -41,6 +42,9 @@ class HighlevelQuery:
             return list(filter(lambda element: self.__is_element_has_attr(element, attr), elements))
         else:
             return elements
+    
+    def find_by_classname(self, class_name, attr={}):
+        return self.__find_by_classname(class_name, attr)
 
     def password_field_count(self):
         return len(self.__find_by_classname(Widget.EDIT_TEXT, {"password": True}))
