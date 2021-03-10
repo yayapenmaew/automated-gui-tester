@@ -90,10 +90,32 @@ class ActionBarRule(Rule):
             self.finished = True
 
 
+class SkipButtonRule(Rule):
+    
+    def name(self):
+        return "Found Skip button"
+
+    def description(self):
+        return "Press the skip button"
+
+    def match(self, app_controller: AppController):
+        buttons = app_controller.get_clickable_elements()
+        for btn in buttons:
+            if btn.get_attribute("text").lower() == "skip":
+                btn.click()
+                return True
+        return False
+
+    def action(self, app_controller: AppController):
+        pass
+
+
+
 def initialize_rules():
     rules = [
         ViewPagerRule(),
         ImageButtonRule(),
         ActionBarRule(),
+        SkipButtonRule(),
     ]
     return rules
