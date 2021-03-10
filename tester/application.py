@@ -92,7 +92,6 @@ class DynamicTestingApplication:
         '''Skip advertisement results'''
         ads_result_count = len(app_controller.highlevel_query.find_by_classname(
             Widget.VIEW, {"contentDescription": re.compile("\nAd\n")}))
-        print(ads_result_count)
         results[ads_result_count].click()
 
         app_controller.delay(3)
@@ -111,7 +110,6 @@ class DynamicTestingApplication:
         icon_location = app_icon.location_in_view
         icon_bounds = ((icon_location['x'], icon_location['y']), (icon_location['x'] +
                                                                   app_icon.size['width'], icon_location['y'] + app_icon.size['height']))
-        logging.info(icon_bounds)
         icon_file = BytesIO(base64.b64decode(app_controller.get_screenshot()))
         icon_img = Image.open(icon_file)
         icon_img = icon_img.crop(
