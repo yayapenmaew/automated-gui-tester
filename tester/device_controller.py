@@ -8,6 +8,10 @@ adb_path = "adb"
 class DeviceController:
     def __init__(self, device_name):
         self.device_name = device_name
+        if '.' in device_name:
+            # Connect tcp when device_name is in IP address format.
+            cmd = f"adb connect {device_name}"
+            os.system(cmd)
 
     def __extract_online_devices(self):
         """Extract online devices using adb"""
@@ -77,3 +81,11 @@ class DeviceController:
 
     def install_apk(self, apk_path):
         self.__adb_install(apk_path)
+
+    def get_default_activity_of(self, package_name):
+        cmd = [adb_path, "shell", "cmd", "package", "resolve-activity", "--brief", package_name, "| tail -n 1"]
+        p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        output, err = p.communicate()
+        rc = p.returncode
+        output = output.decode("utf-8")
+        return output.strip().replace('/', '')
