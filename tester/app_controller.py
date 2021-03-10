@@ -5,27 +5,46 @@ import random
 from appium import webdriver
 from appium.webdriver.common.touch_action import TouchAction
 from .highlevel_query import HighlevelQuery
+import logging
 
 
 class AppController:
-    def __init__(self, desired_cap, apk_path, activity=None):
+    def __init__(self, desired_cap, package_name=None, activity=None):
         self.desired_cap = desired_cap
         self.appium_port = desired_cap['appiumPort']
-        self.package_name = path.splitext(path.basename(apk_path))[0]
-        self.desired_cap['appPackage'] = self.package_name
+
+        if package_name:
+            self.package_name = package_name
+            self.desired_cap['appPackage'] = self.package_name
         if activity:
             self.desired_cap['appActivity'] = activity
 
-        self.__start_appium()
-        time.sleep(2)
-        self.connect_driver()
+        appium_error = True
+        retries = 3
+        while appium_error and retries > 0:
+            try:
+                appium_error = False
+                self.__start_appium()
+                time.sleep(2)
+                self.connect_driver()
+            except Exception as e:
+                logging.error('Could not connect to appium, retrying')
+                logging.error(e)
+                self.__kill_appium()
+                time.sleep(2)
+                appium_error = True
+                retries -= 1
+        
+        if appium_error:
+            raise Exception("Appium error after 3 retries")
+
         self.launch_app()
         time.sleep(5)
         self.package_name = self.get_current_package()
 
         self.highlevel_query = HighlevelQuery(self.driver)
 
-        print(self.package_name)
+        logging.info(f"Running {self.package_name} application")
 
     def __del__(self):
         self.__kill_appium()
@@ -105,3 +124,9 @@ class AppController:
 
     def get_page_source(self):
         return self.driver.page_source
+
+    def get_screenshot(self):
+        return self.driver.get_screenshot_as_base64()
+
+    def send_key_event(self, key_code):
+        return self.driver.press_keycode(key_code)
