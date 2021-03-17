@@ -50,7 +50,7 @@ class AppController:
         self.__kill_appium()
 
     def __start_appium(self):
-        cmd = f"appium -p {self.appium_port} >> log/{self.package_name}.log &"
+        cmd = f"appium -p {self.appium_port} >> log_appium/{self.package_name}.log &"
         os.system(cmd)
 
     def __kill_appium(self):
@@ -63,8 +63,12 @@ class AppController:
             f"http://0.0.0.0:{self.appium_port}/wd/hub", self.desired_cap)
 
     def get_window_size(self):
+        if hasattr(self, 'window_size'):
+            return self.window_size
+
         window_size = self.driver.get_window_size()
-        return window_size['width'], window_size['height']
+        self.window_size = window_size['width'], window_size['height']
+        return self.window_size
 
     def get_current_package(self):
         return self.driver.current_package
@@ -79,6 +83,14 @@ class AppController:
     def get_clickable_elements(self):
         return self.driver.find_elements_by_android_uiautomator("new UiSelector().clickable(true)")
 
+    def click_random_elements(self):
+        clickables = self.get_clickable_elements()
+        random_button = random.choice(clickables)
+        try:
+            random_button.click()
+        except:
+            pass
+
     def launch_app(self):
         self.driver.launch_app()
 
@@ -90,7 +102,10 @@ class AppController:
 
         x, y = width * x_percent / 100, height * y_percent / 100
 
-        TouchAction(self.driver).press(x=x, y=max(100, y)).perform()
+        try:
+            TouchAction(self.driver).press(x=x, y=max(100, y)).perform()
+        except:
+            pass
 
     def swipe(self, dir='left', duration=400):
         assert dir in ['left', 'right', 'down', 'up']

@@ -3,20 +3,29 @@ import os
 from .desired_cap import AndroidDesiredCapabilities
 from .device_controller import DeviceController
 from .app_controller import AppController
+from .mitm_controller import ProxyController
 from .debugger import Debugger
 from .highlevel_query import Widget
 import time
 import re
 import logging
-from io import BytesIO
-from PIL import Image
-import base64
+from progressbar import progressbar
 
 
 class DynamicTestingApplication:
-    def __init__(self, udid, version, system_port=8200, proxy_port=8080, appium_port=4723):
+    def __init__(
+        self,
+        udid,
+        version,
+        proxy_host,
+        system_port=8200,
+        proxy_port=8080,
+        appium_port=4723,
+        mitm_path="./tester/mitmproxy/osx/mitmdump"
+    ):
         self.desired_cap = AndroidDesiredCapabilities.generate(
             udid, version, system_port, proxy_port, appium_port)
+        self.proxy_host = proxy_host
         self.device_udid = udid
         self.on_perform = lambda app_controller: None
         self.on_before = lambda app_controller: None
@@ -31,7 +40,7 @@ class DynamicTestingApplication:
                 break
 
     def setup_folder(self):
-        os.system("mkdir log")
+        os.system("mkdir log_appium")
         os.system("mkdir result")
         os.system("mkdir log_mitm")
 
@@ -44,7 +53,7 @@ class DynamicTestingApplication:
             os.environ['JAVA_HOME'] = java_home
 
     def foreach(self, function):
-        """Set function to perform on each loop. 
+        """Set function to perform on each loop.
         The function receive AppController as a argument"""
         self.on_perform = function
 
@@ -88,7 +97,7 @@ class DynamicTestingApplication:
         while not results:
             results = app_controller.highlevel_query.find_by_classname(
                 Widget.LINEAR_LAYOUT, {"clickable": True})
-            app_controller.delay(1)
+            app_controller.delay(3)
         '''Skip advertisement results'''
         ads_result_count = len(app_controller.highlevel_query.find_by_classname(
             Widget.VIEW, {"contentDescription": re.compile("\nAd\n")}))
@@ -104,18 +113,17 @@ class DynamicTestingApplication:
             map(lambda elem: elem.get_attribute('text'), app_info))
         logging.info(f"{app_name} ({dev_name})")
 
+        '''DEPRECATED'''
         '''Get app icon by taking a screenshot'''
-        app_icon = app_controller.highlevel_query.find_by_classname(Widget.IMAGE_VIEW)[
-            0]
-        icon_location = app_icon.location_in_view
-        icon_bounds = ((icon_location['x'], icon_location['y']), (icon_location['x'] +
-                                                                  app_icon.size['width'], icon_location['y'] + app_icon.size['height']))
-        icon_file = BytesIO(base64.b64decode(app_controller.get_screenshot()))
-        icon_img = Image.open(icon_file)
-        icon_img = icon_img.crop(
-            (icon_bounds[0][0], icon_bounds[1][0], icon_bounds[0][1], icon_bounds[1][1]))
-        # TODO: Something with the info
-        # icon_img.save('icon.png')
+        # app_icon = app_controller.highlevel_query.find_by_classname(Widget.IMAGE_VIEW)[
+        #     0]
+        # icon_location = app_icon.location_in_view
+        # icon_bounds = ((icon_location['x'], icon_location['y']), (icon_location['x'] +
+        #                                                           app_icon.size['width'], icon_location['y'] + app_icon.size['height']))
+        # icon_file = BytesIO(base64.b64decode(app_controller.get_screenshot()))
+        # icon_img = Image.open(icon_file)
+        # icon_img = icon_img.crop(
+        #     (icon_bounds[0][0], icon_bounds[1][0], icon_bounds[0][1], icon_bounds[1][1]))
 
         '''Click install button'''
         logging.info('Installing the application')
@@ -163,6 +171,17 @@ class DynamicTestingApplication:
             if not activity:
                 activity = self.device_controller.get_default_activity_of(
                     package_name)
+                logging.info(
+                    f"The application will be started with the activity {activity}")
+                if not activity:
+                    raise Exception(
+                        "Could not find the default activity of the application.")
+
+        '''Initialize a proxy server'''
+        proxy_port = self.desired_cap['proxyPort']
+        logging.info(f"Setting wifi proxy to {self.proxy_host}:{proxy_port}")
+        self.device_controller.set_wifi_proxy(self.proxy_host, proxy_port)
+        proxy_controller = ProxyController(proxy_port, package_name)
 
         app_controller = AppController(
             extended_desired_cap, package_name, activity)
@@ -175,6 +194,14 @@ class DynamicTestingApplication:
         if debug:
             self.__debug(app_controller)
         else:
-            for i in range(action_count):
+            for i in progressbar(range(action_count)):
                 self.on_perform(app_controller, i)
                 time.sleep(1)
+
+        '''Cleaning up'''
+        logging.info('Cleaning up')
+        self.device_controller.set_wifi_proxy()  # Set back to default
+
+        logging.info('The application has been tested sucessfully')
+
+

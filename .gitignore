@@ -1,6 +1,7 @@
 # Generated Log folders
 log/
 log_mitm/
+log_appium/
 result/
 
 # Byte-compiled / optimized / DLL files

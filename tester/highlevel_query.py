@@ -39,20 +39,20 @@ class HighlevelQuery:
         for attr, value in attribute.items():
             try:
                 real_value = element.get_attribute(attr)
+
+                if type(value) == re.Pattern:
+                    if not value.search(real_value):
+                        return False
+                else:
+                    if type(value) == bool:
+                        value = str(value).lower()
+                    elif type(value) in [int, float]:
+                        value = str(value)
+
+                    if not real_value or value != real_value:
+                        return False
             except:
                 return False
-
-            if type(value) == re.Pattern:
-                if not value.search(real_value):
-                    return False
-            else:
-                if type(value) == bool:
-                    value = str(value).lower()
-                elif type(value) in [int, float]:
-                    value = str(value)
-
-                if not real_value or value != real_value:
-                    return False
 
         return True
 

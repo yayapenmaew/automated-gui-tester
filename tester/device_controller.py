@@ -83,9 +83,16 @@ class DeviceController:
         self.__adb_install(apk_path)
 
     def get_default_activity_of(self, package_name):
-        cmd = [adb_path, "shell", "cmd", "package", "resolve-activity", "--brief", package_name, "| tail -n 1"]
+        cmd = [adb_path, "-s", self.device_name, "shell", "cmd", "package",
+               "resolve-activity", "--brief", package_name, "| tail -n 1"]
         p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
         output, err = p.communicate()
         rc = p.returncode
         output = output.decode("utf-8")
         return output.strip().replace('/', '')
+
+    """If host and proxy_port are not provided, proxy setting will be removed instead."""
+
+    def set_wifi_proxy(self, host='', proxy_port='0'):
+        cmd = f"adb -s {self.device_name} shell settings put global http_proxy {host}:{proxy_port}"
+        os.system(cmd)
