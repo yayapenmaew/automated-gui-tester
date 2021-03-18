@@ -1,16 +1,67 @@
-from tester.application import DynamicTestingApplication
-from tester.app_controller import AppController
+import argparse
+import subprocess as sub
+import threading
 
-app = DynamicTestingApplication("K6T6R17909001485", "7.0")
+TIMEOUT_SEC = 5 * 60
 
-app.set_env_path(
-    android_sdk_root="/Users/nisaruj/Library/Android/sdk",
-    java_home="/Library/Java/JavaVirtualMachines/jdk-13.0.1.jdk/Contents/Home"
-)
+class RunCmd(threading.Thread):
+    def __init__(self, cmd, timeout):
+        threading.Thread.__init__(self)
+        self.cmd = cmd
+        self.timeout = timeout
 
-def on_perform(app_controller: AppController):
-    app_controller.random_touch()
+    def run(self):
+        self.p = sub.Popen(self.cmd)
+        self.p.wait()
 
-app.set_on_perform(on_perform)
+    def Run(self):
+        self.start()
+        self.join(self.timeout)
 
-app.test('./demo.apk')
+        if self.is_alive():
+            self.p.terminate()      #use self.p.kill() if process needs a kill -9
+            self.join()
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument('device_name', metavar='device_name',
+                    type=str, help='Device UDID or IP address')
+parser.add_argument('app_id', metavar='app_id', type=str,
+                    help='Application identifier')
+parser.add_argument('proxy_host', metavar='proxy_host',
+                    type=str, help='Proxy host')
+
+parser.add_argument('--version', metavar='version', type=str,
+                    help='Android version', default="7.0")
+parser.add_argument('--proxy_port', metavar='proxy_port',
+                    type=int, help='Proxy port', default=8080)
+parser.add_argument('--system_port', metavar='system_port',
+                    type=int, help='System port', default=8200)
+parser.add_argument('--appium_port', metavar='appium_port',
+                    type=int, help='Appium port', default=4723)
+
+"""
+Example call:
+    python3 main.py K6T6R17909001485 com.ookbee.ookbeecomics.android 192.168.1.249
+    python3 main.py 192.168.1.41:5555 com.ookbee.ookbeecomics.android 192.168.1.249
+"""
+if __name__ == '__main__':
+    args = parser.parse_args()
+
+    cmd = [
+        'python3',
+        './monkey.py', 
+        args.device_name,
+        args.app_id,
+        args.proxy_host,
+        '--version',
+        args.version,
+        '--proxy_port',
+        str(args.proxy_port),
+        '--system_port',
+        str(args.system_port),
+        '--appium_port',
+        str(args.appium_port)
+    ]
+
+    RunCmd(cmd, TIMEOUT_SEC).Run()

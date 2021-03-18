@@ -43,6 +43,7 @@ class DynamicTestingApplication:
         os.system("mkdir log_appium")
         os.system("mkdir result")
         os.system("mkdir log_mitm")
+        os.system("mkdir log_tester")
 
     def set_env_path(self, android_sdk_root=None, java_home=None):
         """Call this method before performing test if there are errors about environment path"""

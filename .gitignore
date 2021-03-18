@@ -2,6 +2,7 @@
 log/
 log_mitm/
 log_appium/
+log_tester/
 result/
 
 # Byte-compiled / optimized / DLL files
