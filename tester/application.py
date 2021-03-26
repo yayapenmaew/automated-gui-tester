@@ -44,6 +44,9 @@ class DynamicTestingApplication:
         os.system("mkdir result")
         os.system("mkdir log_mitm")
         os.system("mkdir log_tester")
+        os.system("mkdir apk")
+        os.system("mkdir app_icons")
+        os.system("mkdir app_info")
 
     def set_env_path(self, android_sdk_root=None, java_home=None):
         """Call this method before performing test if there are errors about environment path"""
@@ -107,12 +110,12 @@ class DynamicTestingApplication:
         app_controller.delay(3)
 
         '''Retrieve app information'''
-        logging.info('Retrieving app info')
-        app_info = app_controller.highlevel_query.find_by_classname(
-            Widget.TEXT_VIEW)[:2]
-        app_name, dev_name = list(
-            map(lambda elem: elem.get_attribute('text'), app_info))
-        logging.info(f"{app_name} ({dev_name})")
+        # logging.info('Retrieving app info')
+        # app_info = app_controller.highlevel_query.find_by_classname(
+        #     Widget.TEXT_VIEW)[:2]
+        # app_name, dev_name = list(
+        #     map(lambda elem: elem.get_attribute('text'), app_info))
+        # logging.info(f"{app_name} ({dev_name})")
 
         '''DEPRECATED'''
         '''Get app icon by taking a screenshot'''
@@ -147,7 +150,7 @@ class DynamicTestingApplication:
         del app_controller
         time.sleep(8)
 
-    def test(self, apk_path, action_count=10, install=True, debug=False, activity=None, install_type="apk"):
+    def test(self, apk_path, action_count=10, install=True, debug=False, activity=None, install_type="apk", dump_apk=True, dump_manifest=True):
         if not self.device_controller.is_online():
             raise Exception('The testing device is offine')
 
@@ -157,8 +160,17 @@ class DynamicTestingApplication:
                 self.device_controller.install_apk(apk_path)
             elif install_type == "playstore":
                 self.install_via_playstore(apk_path)
+
+                '''Dump apk'''
+                if dump_apk:
+                    self.device_controller.dump_apk(apk_path, f"apk/{apk_path}.apk")
+
+                    if dump_manifest:
+                        self.device_controller.dump_apk_manifest(apk_path)
+
             else:
                 raise Exception('Invalid installation type')
+
 
         '''Include app or appPackage into desired cap'''
         extended_desired_cap = self.desired_cap

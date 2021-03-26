@@ -1,6 +1,10 @@
 from subprocess import Popen, PIPE
 import os
 import time
+import logging
+import zipfile
+import json
+import re
 
 adb_path = "adb"
 
@@ -41,6 +45,17 @@ class DeviceController:
         """Install apk into the device"""
         cmd = f"{adb_path} -s {self.device_name} install -r {apk_path}"
         os.system(cmd)
+
+    def __adb_shell(self, *commands):
+        cmd = f"{adb_path} -s {self.device_name} shell {' '.join(commands)}"
+        os.system(cmd)
+
+    def __execute_and_get_output(self, cmd):
+        """Run command and get output from stdout"""
+        p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        output, err = p.communicate()
+        rc = p.returncode
+        return output.decode("utf-8").strip()
 
     def is_online(self):
         for device in self.__extract_online_devices():
@@ -85,14 +100,76 @@ class DeviceController:
     def get_default_activity_of(self, package_name):
         cmd = [adb_path, "-s", self.device_name, "shell", "cmd", "package",
                "resolve-activity", "--brief", package_name, "| tail -n 1"]
-        p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-        output, err = p.communicate()
-        rc = p.returncode
-        output = output.decode("utf-8")
-        return output.strip().replace('/', '')
+        return self.__execute_and_get_output(cmd).replace('/', '')
 
     """If host and proxy_port are not provided, proxy setting will be removed instead."""
 
     def set_wifi_proxy(self, host='', proxy_port='0'):
         cmd = f"adb -s {self.device_name} shell settings put global http_proxy {host}:{proxy_port}"
         os.system(cmd)
+
+    def dump_apk(self, package_name, file_path):
+        # Get apk path
+        apk_path_list = self.__execute_and_get_output(
+            [adb_path, "-s", self.device_name, "shell", "pm", "path", package_name])
+
+        """Sample output of apk_path_list:
+            package:/data/app/com.ookbee.ookbeecomics.android-1/base.apk
+        """
+        base_apk_path = (apk_path_list.split()[0].strip())[8:]
+
+        logging.info(f"Dumping the apk from {base_apk_path} to {file_path}")
+
+        # Move to temp folder
+        TEMP_APK_DIR = '/storage/emulated/0/Download/'
+        temp_apk_path = TEMP_APK_DIR + package_name + '.apk'
+        self.__adb_shell("cp", base_apk_path, temp_apk_path)
+
+        # Dump apk
+        cmd = f"{adb_path} pull {temp_apk_path} {file_path}"
+        os.system(cmd)
+
+    def dump_apk_manifest(self, package_name):
+        apk_path = f"apk/{package_name}.apk"
+        cmd = ["aapt", "dump", "badging", apk_path]
+        out = self.__execute_and_get_output(cmd)
+
+        versionName = None
+        appLabel = None
+        appIcon = None
+
+        for line in out.split('\n'):
+            line = line.strip()
+            if not versionName and 'versionName=' in line:
+                version_search = re.search("versionName=\'(.*?)\'", line)
+                if version_search:
+                    versionName = version_search.group(1)
+            elif not appLabel and 'application-label:' in line:
+                app_label_search = re.search(
+                    "application-label.*?:\'(.*?)\'", line)
+                if app_label_search:
+                    appLabel = app_label_search.group(1)
+            elif not appIcon and 'application-icon' in line:
+                app_icon_search = re.search(
+                    "application-icon-640:\'(.*?)\'", line)
+                if app_icon_search:
+                    appIcon = app_icon_search.group(1)
+
+        '''Dump app icon'''
+        with zipfile.ZipFile(apk_path) as bundle:
+            with bundle.open(appIcon) as icon_image:
+                with open(f"app_icons/{package_name}.png", 'wb') as icon_file:
+                    icon_file.write(icon_image.read())
+
+        result = {
+            "versionName": versionName,
+            "appLabel": appLabel,
+            "appIcon": appIcon
+        }
+
+        with open(f"app_info/{package_name}.json", "w") as app_info:
+            json.dump(result, app_info)
+
+        logging.info(f"Extracted the manifest from the apk. Got {result}")
+
+        return result
