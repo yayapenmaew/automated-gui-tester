@@ -4,6 +4,9 @@ log_mitm/
 log_appium/
 log_tester/
 result/
+apk/
+app_icons/
+app_info/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

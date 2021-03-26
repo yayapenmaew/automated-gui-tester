@@ -6,6 +6,9 @@ A framework for developing automated Android application GUI tester.
 
 - Appium-Python-Client==1.0.2
 - adb (Included in Android SDK Platform-Tools)
+- aapt
+
+Please make sure that `adb` and `aapt` can be executed from commandline.
 
 ## Example
 You can simulate random interactions like Monkey does with a few lines of code.
