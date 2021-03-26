@@ -1,6 +1,10 @@
 import argparse
 import subprocess as sub
 import threading
+import os
+import pathlib
+import time
+from analyzer.PI_detection import VULPIXAnalyzer
 
 TIMEOUT_SEC = 5 * 60
 
@@ -65,3 +69,18 @@ if __name__ == '__main__':
     ]
 
     RunCmd(cmd, TIMEOUT_SEC).Run()
+
+    time.sleep(3)
+    result = VULPIXAnalyzer.analyze(args.app_id)
+
+    logs_path = {
+        "appium": os.path.join(pathlib.Path(__file__).parent.absolute(), 'log_appium', args.app_id + '.log'),
+        "mitm": os.path.join(pathlib.Path(__file__).parent.absolute(), 'log_mitm', args.app_id + '.log'),
+        "tester": os.path.join(pathlib.Path(__file__).parent.absolute(), 'log_tester', args.app_id),
+        "har": os.path.join(pathlib.Path(__file__).parent.absolute(), 'result', args.app_id + '.har'),
+        "apk": os.path.join(pathlib.Path(__file__).parent.absolute(), 'apk', args.app_id + '.apk')
+    }
+
+    print('Result', result)
+    print()
+    print('Logs', logs_path)
