@@ -5,6 +5,7 @@ import time
 import logging
 import argparse
 import os
+from tester.exceptions import DynamicTestError, PaidAppError
 
 
 parser = argparse.ArgumentParser()
@@ -33,39 +34,46 @@ if __name__ == '__main__':
     logging.basicConfig(format='[%(levelname)s] %(message)s',
                         level=logging.INFO, 
                         handlers=[
-                            logging.FileHandler(filename=f"log_tester/{args.app_id}"),
+                            logging.FileHandler(filename=f"log_tester/{args.app_id}", mode="w"),
                             logging.StreamHandler()
                         ])
 
-    app = DynamicTestingApplication(
-        udid=args.device_name,
-        version=args.version,
-        proxy_host=args.proxy_host,
-        system_port=args.system_port,
-        proxy_port=args.proxy_port,
-        appium_port=args.appium_port,
-        mitm_path="./tester/mitmproxy/osx/mitmdump",  # Linux user: plz change this line!
-    )
+    try:
+        app = DynamicTestingApplication(
+            udid=args.device_name,
+            version=args.version,
+            proxy_host=args.proxy_host,
+            system_port=args.system_port,
+            proxy_port=args.proxy_port,
+            appium_port=args.appium_port,
+            mitm_path="./tester/mitmproxy/osx/mitmdump",  # Linux user: plz change this line!
+        )
 
-    '''In case Appium needs proper env paths'''
-    app.set_env_path(
-        android_sdk_root="/Users/nisaruj/Library/Android/sdk",
-        java_home="/Library/Java/JavaVirtualMachines/jdk-13.0.1.jdk/Contents/Home"
-    )
+        '''In case Appium needs proper env paths'''
+        app.set_env_path(
+            android_sdk_root="/Users/nisaruj/Library/Android/sdk",
+            java_home="/Library/Java/JavaVirtualMachines/jdk-13.0.1.jdk/Contents/Home"
+        )
 
-    action_count = 20
-    app.set_action_count(action_count)
+        action_count = 20
+        app.set_action_count(action_count)
 
-    def on_perform(app_controller: AppController, step):
-        try:
-            app_controller.random_touch()
-            app_controller.click_random_elements()
-        except:
-            pass
+        def on_perform(app_controller: AppController, step):
+            try:
+                app_controller.random_touch()
+                app_controller.click_random_elements()
+            except:
+                pass
 
-    app.foreach(on_perform)
+        app.foreach(on_perform)
 
-    app.test(
-        args.app_id,
-        install_type='playstore'
-    )
+        app.test(
+            args.app_id,
+            install_type='playstore',
+        )
+    except PaidAppError:
+        logging.error('Paid app is not supported')
+        raise PaidAppError
+    except:
+        logging.error('Unexpected error while performing dynamic test')
+        raise DynamicTestError

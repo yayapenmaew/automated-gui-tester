@@ -10,6 +10,7 @@ import time
 import re
 import logging
 from progressbar import progressbar
+from .exceptions import PaidAppError
 
 
 class DynamicTestingApplication:
@@ -143,6 +144,9 @@ class DynamicTestingApplication:
                     Widget.BUTTON, {"text": "Uninstall"})) > 0
             logging.info('Installed successfully')
         else:
+            paid_button = app_controller.highlevel_query.find_by_classname(Widget.BUTTON, {"text": re.compile("\d.*")})
+            if len(paid_button) > 0:
+                raise PaidAppError
             logging.warn(
                 "Could not find the install button. The app may be already installed, skipping.")
 

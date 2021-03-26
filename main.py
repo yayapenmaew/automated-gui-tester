@@ -5,6 +5,7 @@ import os
 import pathlib
 import time
 from analyzer.PI_detection import VULPIXAnalyzer
+from tester.exceptions import TimeOutError, VULPIXAnalyzerError
 
 TIMEOUT_SEC = 5 * 60
 
@@ -25,6 +26,9 @@ class RunCmd(threading.Thread):
         if self.is_alive():
             self.p.terminate()      #use self.p.kill() if process needs a kill -9
             self.join()
+            raise TimeOutError
+        elif self.p.returncode != 0:
+            raise Exception(f"Unexpected error on the tester subprocess. The error details are saved to log file.")
 
 parser = argparse.ArgumentParser()
 
@@ -71,7 +75,10 @@ if __name__ == '__main__':
     RunCmd(cmd, TIMEOUT_SEC).Run()
 
     time.sleep(3)
-    result = VULPIXAnalyzer.analyze(args.app_id)
+    try:
+        result = VULPIXAnalyzer.analyze(args.app_id)
+    except:
+        raise VULPIXAnalyzerError
 
     logs_path = {
         "appium": os.path.join(pathlib.Path(__file__).parent.absolute(), 'log_appium', args.app_id + '.log'),
