@@ -167,9 +167,6 @@ class DeviceController:
             "appIcon": appIcon
         }
 
-        with open(f"app_info/{package_name}.json", "w") as app_info:
-            json.dump(result, app_info)
-
         logging.info(f"Extracted the manifest from the apk. Got {result}")
 
         return result

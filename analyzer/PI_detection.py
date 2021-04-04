@@ -18,42 +18,48 @@ from multiprocessing import Pool, Lock
 
 result_folder = "../result"
 
+class PI_GROUP:
+    DEVICE = "device"
+    SIMCARD = "simcard"
+    USER = "user"
+    LOCATION = "location"
+
 # PI elements that we are interest
 
-PII_TYPE = [
-    "Advertiser ID",
-    "Android ID",
-    "Device Serial Number",
-    "Google Services Framework ID",
-    "IMEI",
-    "MAC Address",
-    "Cell ID",
-    "ICCID (SIM serial number)",
-    "IMSI",
-    "Location Area Code",
-    "Phone Number",
-    "Age",
-    "Audio Recording",
-    "Calendar",
-    "Contract Book",
-    "Country",
-    "Credit Card CCV",
-    "Date Of Birth",
-    "Email",
-    "Gender",
-    "Name",
-    "Password",
-    "Photo",
-    "Physical Address",
-    "Relationship Status",
-    "SMS Message",
-    "SSN",
-    "Time Zone",
-    "Username",
-    "Video",
-    "Web Browsing Log",
-    "GPS (current latitude and longitude)"
-]
+PII_TYPE = {
+    "Advertiser ID": { "group": PI_GROUP.DEVICE },
+    "Android ID": { "group": PI_GROUP.DEVICE },
+    "Device Serial Number": { "group": PI_GROUP.DEVICE },
+    "Google Services Framework ID": { "group": PI_GROUP.DEVICE },
+    "IMEI": { "group": PI_GROUP.DEVICE },
+    "MAC Address": { "group": PI_GROUP.DEVICE },
+    "Cell ID": { "group": PI_GROUP.SIMCARD },
+    "ICCID (SIM serial number)": { "group": PI_GROUP.SIMCARD },
+    "IMSI": { "group": PI_GROUP.SIMCARD },
+    "Location Area Code": { "group": PI_GROUP.SIMCARD },
+    "Phone Number": { "group": PI_GROUP.SIMCARD },
+    "Age": { "group": PI_GROUP.USER },
+    "Audio Recording": { "group": PI_GROUP.USER },
+    "Calendar": { "group": PI_GROUP.USER },
+    "Contract Book": { "group": PI_GROUP.USER },
+    "Country": { "group": PI_GROUP.USER },
+    "Credit Card CCV": { "group": PI_GROUP.USER },
+    "Date Of Birth": { "group": PI_GROUP.USER },
+    "Email": { "group": PI_GROUP.USER },
+    "Gender": { "group": PI_GROUP.USER },
+    "Name": { "group": PI_GROUP.USER },
+    "Password": { "group": PI_GROUP.USER },
+    "Photo": { "group": PI_GROUP.USER },
+    "Physical Address": { "group": PI_GROUP.USER },
+    "Relationship Status": { "group": PI_GROUP.USER },
+    "SMS Message": { "group": PI_GROUP.USER },
+    "SSN": { "group": PI_GROUP.USER },
+    "Time Zone": { "group": PI_GROUP.USER },
+    "Username": { "group": PI_GROUP.USER },
+    "Video": { "group": PI_GROUP.USER },
+    "Web Browsing Log": { "group": PI_GROUP.USER },
+    "GPS (current latitude and longitude)": { "group": PI_GROUP.USER },
+}
 
 
 Unique_username = "Sylphsgt098VWE"
@@ -258,6 +264,25 @@ class VULPIXAnalyzer():
             Backgroud_Traffic.add(bg)
         return Backgroud_Traffic
 
+    def score(PI_result):
+        leaks_by_group = {
+            PI_GROUP.DEVICE: 0,
+            PI_GROUP.SIMCARD: 0,
+            PI_GROUP.USER: 0,
+            PI_GROUP.LOCATION: 0,
+        }
+        for PI_element in PII_TYPE:
+            pi_group = PII_TYPE[PI_element]['group']
+            leaks_by_group[pi_group] += PI_result[PI_element]
+
+        VULPIX_score = 0
+        for group in leaks_by_group:
+            if leaks_by_group[group] > 4:
+                VULPIX_score += 25
+            else:
+                VULPIX_score += leaks_by_group[group] / 4 * 25
+        return VULPIX_score
+
     def analyze(package_name, PI_file_path="./analyzer/PI.json", har_file=None):
         logging.info(f"Analyzing traffic of {package_name}")
         result_dict = dict()
@@ -278,6 +303,10 @@ class VULPIXAnalyzer():
             Packets = json_body["log"]["entries"]
             packagename = package_name
             Entries_size = len(Packets)
+
+            if not Packets:
+                # No packet detected by the proxy.
+                return 0, result_dict
 
             startTime = Packets[0]["startedDateTime"]
             found_PI = False
@@ -350,7 +379,7 @@ class VULPIXAnalyzer():
                         found_PI_time = Packets[i]["startedDateTime"]
                         found_PI = True
 
-            return result_dict
+            return VULPIXAnalyzer.score(result_dict), result_dict
 
         except Exception as err:
             logging.error("Unexpected error during analyze har file.")
@@ -362,12 +391,14 @@ if __name__ == '__main__':
     if 2 <= len(sys.argv) <= 3:
         package_name = sys.argv[1]
         pretty = len(sys.argv) == 3 and sys.argv[2] in ['-P', '--prettify']
-        result = VULPIXAnalyzer.analyze(package_name, PI_file_path="PI.json", har_file=f"../result/{package_name}.har")
+        score, result = VULPIXAnalyzer.analyze(package_name, PI_file_path="PI.json", har_file=f"../result/{package_name}.har")
         if pretty:            
+            print('VULPIX SCORE =', score)
+            print()
             for PI in result:
                 print('%-60s%-1i   %-12s' % (PI, result[PI], ['Not Found', 'Found'][result[PI]]))
         else:
-            print(result)
+            print(score, result)
     else:
         print("Usage: ./PI_detection.py <package_name>")
     

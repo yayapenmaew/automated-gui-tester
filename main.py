@@ -48,6 +48,9 @@ parser.add_argument('--system_port', metavar='system_port',
 parser.add_argument('--appium_port', metavar='appium_port',
                     type=int, help='Appium port', default=4723)
 
+parser.add_argument('--timeout', metavar='timeout',
+                    type=int, help='Timeout (second)', default=TIMEOUT_SEC)
+
 """
 Example call:
     python3 main.py K6T6R17909001485 com.ookbee.ookbeecomics.android 192.168.1.249
@@ -72,11 +75,11 @@ if __name__ == '__main__':
         str(args.appium_port)
     ]
 
-    RunCmd(cmd, TIMEOUT_SEC).Run()
+    RunCmd(cmd, args.timeout).Run()
 
     time.sleep(3)
     try:
-        result = VULPIXAnalyzer.analyze(args.app_id)
+        score, result = VULPIXAnalyzer.analyze(args.app_id)
     except:
         raise VULPIXAnalyzerError
 
@@ -85,9 +88,11 @@ if __name__ == '__main__':
         "mitm": os.path.join(pathlib.Path(__file__).parent.absolute(), 'log_mitm', args.app_id + '.log'),
         "tester": os.path.join(pathlib.Path(__file__).parent.absolute(), 'log_tester', args.app_id),
         "har": os.path.join(pathlib.Path(__file__).parent.absolute(), 'result', args.app_id + '.har'),
-        "apk": os.path.join(pathlib.Path(__file__).parent.absolute(), 'apk', args.app_id + '.apk')
+        "apk": os.path.join(pathlib.Path(__file__).parent.absolute(), 'apk', args.app_id + '.apk'),
+        "app_icon": os.path.join(pathlib.Path(__file__).parent.absolute(), 'app_icons', args.app_id + '.png'),
+        "app_info": os.path.join(pathlib.Path(__file__).parent.absolute(), 'app_info', args.app_id + '.json'),
     }
 
-    print('Result', result)
+    print('Result', score, result)
     print()
     print('Logs', logs_path)

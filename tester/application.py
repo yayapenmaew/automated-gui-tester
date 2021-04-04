@@ -103,20 +103,22 @@ class DynamicTestingApplication:
             results = app_controller.highlevel_query.find_by_classname(
                 Widget.LINEAR_LAYOUT, {"clickable": True})
             app_controller.delay(3)
-        '''Skip advertisement results'''
-        ads_result_count = len(app_controller.highlevel_query.find_by_classname(
+        '''Skip advertisement and suggestion results'''
+        result_offset = len(app_controller.highlevel_query.find_by_classname(
             Widget.VIEW, {"contentDescription": re.compile("\nAd\n")}))
-        results[ads_result_count].click()
+        result_offset += len(app_controller.highlevel_query.find_by_classname(
+            Widget.TEXT_VIEW, {"text": "Did you mean:"}))
+        results[result_offset].click()
 
         app_controller.delay(3)
 
         '''Retrieve app information'''
-        # logging.info('Retrieving app info')
-        # app_info = app_controller.highlevel_query.find_by_classname(
-        #     Widget.TEXT_VIEW)[:2]
-        # app_name, dev_name = list(
-        #     map(lambda elem: elem.get_attribute('text'), app_info))
-        # logging.info(f"{app_name} ({dev_name})")
+        logging.info('Retrieving app info')
+        app_info = app_controller.highlevel_query.find_by_classname(
+            Widget.TEXT_VIEW)[:2]
+        app_name, dev_name = list(
+            map(lambda elem: elem.get_attribute('text'), app_info))
+        logging.info(f"{app_name} ({dev_name})")
 
         '''DEPRECATED'''
         '''Get app icon by taking a screenshot'''
@@ -154,6 +156,8 @@ class DynamicTestingApplication:
         del app_controller
         time.sleep(8)
 
+        return app_name, dev_name
+
     def test(self, apk_path, action_count=10, install=True, debug=False, activity=None, install_type="apk", dump_apk=True, dump_manifest=True):
         if not self.device_controller.is_online():
             raise Exception('The testing device is offine')
@@ -163,14 +167,18 @@ class DynamicTestingApplication:
             if install_type == "apk":
                 self.device_controller.install_apk(apk_path)
             elif install_type == "playstore":
-                self.install_via_playstore(apk_path)
+                app_name, dev_name = self.install_via_playstore(apk_path)
 
                 '''Dump apk'''
                 if dump_apk:
                     self.device_controller.dump_apk(apk_path, f"apk/{apk_path}.apk")
 
                     if dump_manifest:
-                        self.device_controller.dump_apk_manifest(apk_path)
+                        manifest = self.device_controller.dump_apk_manifest(apk_path)
+                        manifest["developer"] = dev_name
+
+                        with open(f"app_info/{apk_path}.json", "w") as app_info:
+                            json.dump(manifest, app_info)
 
             else:
                 raise Exception('Invalid installation type')
