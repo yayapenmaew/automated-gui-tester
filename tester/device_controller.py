@@ -129,6 +129,8 @@ class DeviceController:
         cmd = f"{adb_path} pull {temp_apk_path} {file_path}"
         os.system(cmd)
 
+        self.__adb_shell("rm", temp_apk_path)
+
     def dump_apk_manifest(self, package_name):
         apk_path = f"apk/{package_name}.apk"
         cmd = ["aapt", "dump", "badging", apk_path]
@@ -137,6 +139,7 @@ class DeviceController:
         versionName = None
         appLabel = None
         appIcon = None
+        launchableActivity = None
 
         for line in out.split('\n'):
             line = line.strip()
@@ -154,6 +157,11 @@ class DeviceController:
                     "application-icon-640:\'(.*?)\'", line)
                 if app_icon_search:
                     appIcon = app_icon_search.group(1)
+            elif not launchableActivity and 'launchable-activity' in line:
+                app_activity_search = re.search(
+                    "launchable-activity: name=\'(.*?)\'", line)
+                if app_activity_search:
+                    launchableActivity = app_activity_search.group(1)
 
         '''Dump app icon'''
         with zipfile.ZipFile(apk_path) as bundle:
@@ -164,7 +172,8 @@ class DeviceController:
         result = {
             "versionName": versionName,
             "appLabel": appLabel,
-            "appIcon": appIcon
+            "appIcon": appIcon,
+            "launchableActivity": launchableActivity,
         }
 
         logging.info(f"Extracted the manifest from the apk. Got {result}")

@@ -11,6 +11,7 @@ import re
 import logging
 from progressbar import progressbar
 from .exceptions import PaidAppError
+from .playstore_helper import get_category_from_tags
 
 
 class DynamicTestingApplication:
@@ -119,18 +120,12 @@ class DynamicTestingApplication:
         app_name, dev_name = list(
             map(lambda elem: elem.get_attribute('text'), app_info))
         logging.info(f"{app_name} ({dev_name})")
-
-        '''DEPRECATED'''
-        '''Get app icon by taking a screenshot'''
-        # app_icon = app_controller.highlevel_query.find_by_classname(Widget.IMAGE_VIEW)[
-        #     0]
-        # icon_location = app_icon.location_in_view
-        # icon_bounds = ((icon_location['x'], icon_location['y']), (icon_location['x'] +
-        #                                                           app_icon.size['width'], icon_location['y'] + app_icon.size['height']))
-        # icon_file = BytesIO(base64.b64decode(app_controller.get_screenshot()))
-        # icon_img = Image.open(icon_file)
-        # icon_img = icon_img.crop(
-        #     (icon_bounds[0][0], icon_bounds[1][0], icon_bounds[0][1], icon_bounds[1][1]))
+        app_tags = app_controller.highlevel_query.find_by_classname(
+            Widget.BUTTON)
+        app_tags = list(map(lambda elem: elem.get_attribute('text'), app_tags))
+        app_cat = get_category_from_tags(app_tags)
+        logging.info(f"Tags: {', '.join(app_tags)}")
+        logging.info(f"Category: {app_cat}")
 
         '''Click install button'''
         logging.info('Installing the application')
@@ -156,7 +151,7 @@ class DynamicTestingApplication:
         del app_controller
         time.sleep(8)
 
-        return app_name, dev_name
+        return app_name, dev_name, app_cat
 
     def test(self, apk_path, action_count=10, install=True, debug=False, activity=None, install_type="apk", dump_apk=True, dump_manifest=True):
         if not self.device_controller.is_online():
@@ -167,7 +162,7 @@ class DynamicTestingApplication:
             if install_type == "apk":
                 self.device_controller.install_apk(apk_path)
             elif install_type == "playstore":
-                app_name, dev_name = self.install_via_playstore(apk_path)
+                app_name, dev_name, app_cat = self.install_via_playstore(apk_path)
 
                 '''Dump apk'''
                 if dump_apk:
@@ -176,6 +171,10 @@ class DynamicTestingApplication:
                     if dump_manifest:
                         manifest = self.device_controller.dump_apk_manifest(apk_path)
                         manifest["developer"] = dev_name
+                        manifest["category"] = app_cat
+
+                        if not activity:
+                            activity = manifest["launchableActivity"]
 
                         with open(f"app_info/{apk_path}.json", "w") as app_info:
                             json.dump(manifest, app_info)
@@ -196,11 +195,13 @@ class DynamicTestingApplication:
             if not activity:
                 activity = self.device_controller.get_default_activity_of(
                     package_name)
-                logging.info(
-                    f"The application will be started with the activity {activity}")
+                
                 if not activity:
                     raise Exception(
                         "Could not find the default activity of the application.")
+                        
+            logging.info(
+                    f"The application will be started with the activity {activity}")
 
         '''Initialize a proxy server'''
         proxy_port = self.desired_cap['proxyPort']
