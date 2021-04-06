@@ -74,8 +74,6 @@ if __name__ == '__main__':
                         datefmt='%Y-%m-%d %H:%M:%S',
                         level=logging.INFO,
                         handlers=[
-                            logging.FileHandler(
-                                filename=f"log_tester/{args.app_id}", mode="w"),
                             logging.StreamHandler()
                         ])
     logging.info(f"Starting main script with following arguments: {args}")
