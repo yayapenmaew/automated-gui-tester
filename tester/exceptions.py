@@ -9,3 +9,6 @@ class VULPIXAnalyzerError(Exception):
 
 class PaidAppError(Exception):
     pass
+
+class ExternalInterfaceError(Exception):
+    pass

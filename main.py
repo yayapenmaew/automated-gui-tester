@@ -4,13 +4,17 @@ import threading
 import os
 import pathlib
 import time
+import json
 from analyzer.PI_detection import VULPIXAnalyzer
-from tester.exceptions import TimeOutError, VULPIXAnalyzerError
+from tester.exceptions import TimeOutError, VULPIXAnalyzerError, ExternalInterfaceError
+from interfaces.external import ExternalOutputInterface
+import logging
 
 TIMEOUT_SEC = 5 * 60
 
+
 class RunCmd(threading.Thread):
-    def __init__(self, cmd, timeout):
+    def __init__(self, cmd, timeout, result_interface=None):
         threading.Thread.__init__(self)
         self.cmd = cmd
         self.timeout = timeout
@@ -24,11 +28,16 @@ class RunCmd(threading.Thread):
         self.join(self.timeout)
 
         if self.is_alive():
-            self.p.terminate()      #use self.p.kill() if process needs a kill -9
+            self.p.terminate()      # use self.p.kill() if process needs a kill -9
             self.join()
+
+            if result_interface:
+                result_interface.send_error(TimeOutError)
             raise TimeOutError
         elif self.p.returncode != 0:
-            raise Exception(f"Unexpected error on the tester subprocess. The error details are saved to log file.")
+            raise Exception(
+                f"Unexpected error on the tester subprocess. The error details are saved to log file.")
+
 
 parser = argparse.ArgumentParser()
 
@@ -50,6 +59,8 @@ parser.add_argument('--appium_port', metavar='appium_port',
 
 parser.add_argument('--timeout', metavar='timeout',
                     type=int, help='Timeout (second)', default=TIMEOUT_SEC)
+parser.add_argument('--endpoint', metavar='endpoint',
+                    type=str, help='Endpoint that the result will be sent (Example: 127.0.0.1:80)', default=None)
 
 """
 Example call:
@@ -59,9 +70,24 @@ Example call:
 if __name__ == '__main__':
     args = parser.parse_args()
 
+    logging.basicConfig(format='[%(asctime)s.%(msecs)03d][%(levelname)s] %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S',
+                        level=logging.INFO,
+                        handlers=[
+                            logging.FileHandler(
+                                filename=f"log_tester/{args.app_id}", mode="w"),
+                            logging.StreamHandler()
+                        ])
+    logging.info(f"Starting main script with following arguments: {args}")
+
+    if args.endpoint:
+        result_interface = ExternalOutputInterface(f"http://{args.endpoint}")
+    else:
+        result_interface = ExternalOutputInterface()
+
     cmd = [
         'python3',
-        './monkey.py', 
+        './monkey.py',
         args.device_name,
         args.app_id,
         args.proxy_host,
@@ -75,12 +101,13 @@ if __name__ == '__main__':
         str(args.appium_port)
     ]
 
-    RunCmd(cmd, args.timeout).Run()
+    RunCmd(cmd, args.timeout, result_interface).Run()
 
     time.sleep(3)
     try:
         score, result = VULPIXAnalyzer.analyze(args.app_id)
     except:
+        result_interface.send_error(VULPIXAnalyzerError)
         raise VULPIXAnalyzerError
 
     logs_path = {
@@ -93,6 +120,22 @@ if __name__ == '__main__':
         "app_info": os.path.join(pathlib.Path(__file__).parent.absolute(), 'app_info', args.app_id + '.json'),
     }
 
-    print('Result', score, result)
-    print()
-    print('Logs', logs_path)
+    try:
+        with open(logs_path["app_info"]) as fp:
+            app_info = json.loads(fp.read())
+
+        result_interface.send_result(
+            args.app_id,
+            app_info["appLabel"],
+            app_info["versionName"],
+            args.version,
+            score,
+            result,
+            app_info["developer"],
+            logs_path["app_icon"],
+            app_info["category"],
+            logs_path,
+        )
+    except:
+        result_interface.send_error(ExternalInterfaceError)
+        raise ExternalInterfaceError
