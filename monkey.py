@@ -31,7 +31,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     os.system('mkdir log_tester')
-    logging.basicConfig(format='[%(levelname)s] %(message)s',
+    logging.basicConfig(format='[%(asctime)s.%(msecs)03d][%(levelname)s] %(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S',
                         level=logging.INFO, 
                         handlers=[
                             logging.FileHandler(filename=f"log_tester/{args.app_id}", mode="w"),
