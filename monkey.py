@@ -6,6 +6,7 @@ import logging
 import argparse
 import os
 from tester.exceptions import DynamicTestError, PaidAppError
+import sys
 
 
 parser = argparse.ArgumentParser()
@@ -72,9 +73,11 @@ if __name__ == '__main__':
             args.app_id,
             install_type='playstore',
         )
-    except PaidAppError:
+    except PaidAppError as exception:
         logging.error('Paid app is not supported')
+        sys.exit(exception.exit_code)
         raise PaidAppError
     except:
         logging.error('Unexpected error while performing dynamic test')
+        sys.exit(exception.exit_code)
         raise DynamicTestError
