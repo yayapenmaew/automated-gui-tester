@@ -23,7 +23,7 @@ class DynamicTestingApplication:
         system_port=8200,
         proxy_port=8080,
         appium_port=4723,
-        mitm_path="./tester/mitmproxy/osx/mitmdump"
+        mitm_path=os.environ.get("MITM_PATH")
     ):
         self.desired_cap = AndroidDesiredCapabilities.generate(
             udid, version, system_port, proxy_port, appium_port)
