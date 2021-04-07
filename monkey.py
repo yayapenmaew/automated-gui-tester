@@ -6,7 +6,10 @@ import logging
 import argparse
 import os
 from tester.exceptions import DynamicTestError, PaidAppError
+from dotenv import load_dotenv, find_dotenv
 
+
+load_dotenv(find_dotenv())
 
 parser = argparse.ArgumentParser()
 
@@ -47,13 +50,13 @@ if __name__ == '__main__':
             system_port=args.system_port,
             proxy_port=args.proxy_port,
             appium_port=args.appium_port,
-            mitm_path="./tester/mitmproxy/osx/mitmdump",  # Linux user: plz change this line!
+            mitm_path=os.environ.get("MITM_PATH"),  # Linux user: plz change this line!
         )
 
         '''In case Appium needs proper env paths'''
         app.set_env_path(
-            android_sdk_root="/Users/nisaruj/Library/Android/sdk",
-            java_home="/Library/Java/JavaVirtualMachines/jdk-13.0.1.jdk/Contents/Home"
+            android_sdk_root=os.environ.get("ANDROID_SDK_ROOT"),
+            java_home=os.environ.get("JAVA_HOME")
         )
 
         action_count = 20
