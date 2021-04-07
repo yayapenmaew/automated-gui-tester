@@ -141,7 +141,7 @@ class DynamicTestingApplication:
                     Widget.BUTTON, {"text": "Uninstall"})) > 0
             logging.info('Installed successfully')
         else:
-            paid_button = app_controller.highlevel_query.find_by_classname(Widget.BUTTON, {"text": re.compile("\d.*")})
+            paid_button = app_controller.highlevel_query.find_by_classname(Widget.BUTTON, {"text": re.compile("\d+\.\d+")})
             if len(paid_button) > 0:
                 raise PaidAppError
             logging.warn(
