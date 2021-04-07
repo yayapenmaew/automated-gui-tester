@@ -1,5 +1,6 @@
 import requests as req
 import json
+import logging
 
 fieldNameMapper = {
     "Advertiser ID": "advertiserId",
@@ -39,6 +40,8 @@ fieldNameMapper = {
 
 class ExternalOutputInterface:
     def __init__(self, endpoint=None):
+        if not endpoint:
+            logging.warning("External endpoint is not specifed, the result will be displayed on stdin")
         self.endpoint = endpoint
 
     def __send_request(self, payload):
@@ -69,13 +72,13 @@ class ExternalOutputInterface:
 
         return converted_result
 
-    def send_error(exception):
+    def send_error(self, exception):
         payload = { 
             "status": "error",
             "error": exception.__class__.__name__
         }
 
-        self.send_request(payload)
+        self.__send_request(payload)
 
     def send_result(self, app_id, app_name, app_version, android_version, score, PI_result, dev_name, icon_url, category, log_path):
         app_info = self.create_app_info_payload(

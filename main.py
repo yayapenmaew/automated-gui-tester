@@ -6,7 +6,7 @@ import pathlib
 import time
 import json
 from analyzer.PI_detection import VULPIXAnalyzer
-from tester.exceptions import TimeOutError, VULPIXAnalyzerError, ExternalInterfaceError
+from tester.exceptions import TimeOutError, VULPIXAnalyzerError, ExternalInterfaceError, PaidAppError, resolve_exit_code
 from interfaces.external import ExternalOutputInterface
 import logging
 
@@ -35,8 +35,14 @@ class RunCmd(threading.Thread):
                 result_interface.send_error(TimeOutError)
             raise TimeOutError
         elif self.p.returncode != 0:
-            raise Exception(
-                f"Unexpected error on the tester subprocess. The error details are saved to log file.")
+            logging.error(f"Tester error with returncode {self.p.returncode}")
+            try:
+                exception = resolve_exit_code(self.p.returncode)
+                result_interface.send_error(exception)
+                raise exception
+            except:
+                raise Exception(
+                    f"Unexpected error on the tester subprocess. The error details are saved to log file.")
 
 
 parser = argparse.ArgumentParser()
@@ -60,7 +66,7 @@ parser.add_argument('--appium_port', metavar='appium_port',
 parser.add_argument('--timeout', metavar='timeout',
                     type=int, help='Timeout (second)', default=TIMEOUT_SEC)
 parser.add_argument('--endpoint', metavar='endpoint',
-                    type=str, help='Endpoint that the result will be sent (Example: 127.0.0.1:80)', default=None)
+                    type=str, help='Endpoint at which the result will be sent (Example: http://127.0.0.1:80/sendResult)', default=None)
 
 """
 Example call:
@@ -79,7 +85,7 @@ if __name__ == '__main__':
     logging.info(f"Starting main script with following arguments: {args}")
 
     if args.endpoint:
-        result_interface = ExternalOutputInterface(f"http://{args.endpoint}")
+        result_interface = ExternalOutputInterface(f"{args.endpoint}")
     else:
         result_interface = ExternalOutputInterface()
 

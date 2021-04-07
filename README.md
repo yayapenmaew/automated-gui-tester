@@ -1,16 +1,26 @@
-# Automated Android Application Tester Framework
+# Automated Android Application Tester Framework (AAATF)
 
 A framework for developing automated Android application GUI tester.
 
 ## Requirements
 
-- Appium-Python-Client==1.0.2
+- python3
+- `pip install -r requirements.txt`
 - adb (Included in Android SDK Platform-Tools)
 - aapt
+- acvtool (for benchmarking only) [[Installation](https://github.com/pilgun/acvtool)]
 
-Please make sure that `adb` and `aapt` can be executed from commandline.
+Please make sure that `adb` and `aapt` can be executed from command line.
 
-## Example
+## Running the example script
+
+```python
+python main.py <device_id> com.ookbee.ookbeecomics.android <proxy_port>
+```
+
+Run `python main.py -h` for more argument information.
+
+## Writing a simple tester
 You can simulate random interactions like Monkey does with a few lines of code.
 
 Connect a testing device into the computer, change `device_udid` and `android_version` then run the script below.
