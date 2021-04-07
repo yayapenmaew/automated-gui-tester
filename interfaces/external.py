@@ -1,5 +1,6 @@
 import requests as req
 import json
+import logging
 
 fieldNameMapper = {
     "Advertiser ID": "advertiserId",
@@ -39,6 +40,8 @@ fieldNameMapper = {
 
 class ExternalOutputInterface:
     def __init__(self, endpoint=None):
+        if not endpoint:
+            logging.warning("External endpoint is not specifed, the result will be displayed on stdin")
         self.endpoint = endpoint
 
     def __send_request(self, payload):
