@@ -1,2 +1,6 @@
 Appium-Python-Client==1.0.2
 progressbar2==3.53.1
+pandas
+pycountry
+ijson
+python-dotenv
