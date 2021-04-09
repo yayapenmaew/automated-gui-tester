@@ -3,10 +3,12 @@ import os
 import subprocess
 import psutil
 import signal
+from dotenv import load_dotenv, find_dotenv
 
+load_dotenv(find_dotenv())
 
 class ProxyController:
-    def __init__(self, proxy_port=8080, package_name="untitled", mitm_path="./tester/mitmproxy/osx/mitmdump"):
+    def __init__(self, proxy_port=8080, package_name="untitled", mitm_path=os.environ.get("MITM_PATH")):
         self.proxy_port = proxy_port
         self.package_name = package_name
         self.mitm_path = mitm_path

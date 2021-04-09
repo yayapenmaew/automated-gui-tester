@@ -30,3 +30,5 @@ requests == 2.21.0
 
 # TesterFramework/tester/rules/visual_state.py: 8
 zss == 1.2.0
+
+python-dotenv
