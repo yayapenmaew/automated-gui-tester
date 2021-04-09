@@ -1,14 +1,13 @@
-import numpy as np
 import random
 
 
 class BaseGeneticOptimizer:
-    def __init__(self, rules, random_state=None):
+    def __init__(self, rules, random_state=None, debug=False):
         self.rules = rules
         self.random_state = random_state
+        self.debug = debug
         if random_state:
             random.seed(random_state)
-            np.random.seed(random_state)
 
     def fitness(self, agent):
         return sum(agent)
@@ -16,9 +15,16 @@ class BaseGeneticOptimizer:
     def __calc_finess(self, agents):
         return sorted([(self.fitness(agent), agent) for agent in agents], reverse=True)
 
+    def __generate_agent(self):
+        n_feature = len(self.rules)
+        agent = []
+        for i in range(n_feature):
+            agent.append(random.randint(0, 1))
+        return agent
+
     def __initialization(self, size):
         n_feature = len(self.rules)
-        return [np.random.randint(2, size=n_feature).tolist() for i in range(size)]
+        return [self.__generate_agent() for i in range(size)]
 
     def __selection(self, ranked_agents, n_parents):
         assert n_parents <= len(ranked_agents)
@@ -51,11 +57,12 @@ class BaseGeneticOptimizer:
 
     def __show_ranking(self, ranked_agents):
         for score, agent in ranked_agents:
-            print(agent, score)
+            print(agent, "%.2f" % score)
 
-    def __show_pop(self, agents):
-        for agent in agents:
-            print(agent)
+    def __show_gen_banner(self, i_gen, width=40):
+        print('=' * width)
+        print(f'GENERATION {i_gen + 1}'.center(width))
+        print('=' * width)
 
     def optimize(self, pop_size=8, n_gen=5, n_parents=4, r_mut=0.05):
         population = self.__initialization(pop_size)
@@ -63,9 +70,13 @@ class BaseGeneticOptimizer:
         best_agent = None
 
         for i in range(n_gen):
+            if self.debug:
+                self.__show_gen_banner(i)
+
             ranked_agents = self.__calc_finess(population)
-            print('Ranking')
-            self.__show_ranking(ranked_agents)
+
+            if self.debug:
+                self.__show_ranking(ranked_agents)
 
             if ranked_agents[0][0] > best_score:
                 best_score, best_agent = ranked_agents[0]
@@ -82,6 +93,24 @@ class BaseGeneticOptimizer:
         print('Agent:', best_agent)
 
 
+'''For testing purpose'''
+
+
+class DummyGeneticOptimizer(BaseGeneticOptimizer):
+    def __init__(self, n_feat, random_state=None, debug=False):
+        rules = []
+        for i in range(n_feat):
+            rules.append(random.uniform(-5, 5))
+
+        super().__init__(rules, random_state, debug)
+
+    def fitness(self, agent):
+        score = 0
+        for i in range(len(self.rules)):
+            score += agent[i] * self.rules[i]
+        return score
+
+
 if __name__ == '__main__':
-    optimizer = BaseGeneticOptimizer([0] * 30)
+    optimizer = DummyGeneticOptimizer(10, debug=True)
     optimizer.optimize()
