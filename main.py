@@ -6,8 +6,9 @@ import pathlib
 import time
 import json
 from analyzer.PI_detection import VULPIXAnalyzer
-from tester.exceptions import TimeOutError, VULPIXAnalyzerError, ExternalInterfaceError, PaidAppError, resolve_exit_code
+from tester.exceptions import TimeOutError, VULPIXAnalyzerError, ExternalInterfaceError, PaidAppError, resolve_exit_code, BadInputError
 from interfaces.external import ExternalOutputInterface
+from validator.validator import InputValidator
 import logging
 
 TIMEOUT_SEC = 5 * 60
@@ -88,6 +89,20 @@ if __name__ == '__main__':
         result_interface = ExternalOutputInterface(f"{args.endpoint}")
     else:
         result_interface = ExternalOutputInterface()
+
+    # Validate inputs
+    try:
+        if not InputValidator.validate_device_id(args.device_name):
+            raise BadInputError('Bad input: device_name')
+        if not InputValidator.validate_app_identifier(args.app_id):
+            raise BadInputError('Bad input: app_identifier')
+        if not InputValidator.validate_version_number(args.version):
+            raise BadInputError('Bad input: android_version')
+        if not InputValidator.validate_ip_port(args.proxy_host, with_port=False):
+            raise BadInputError('Bad input: proxy_host')
+    except BadInputError as err:
+        result_interface.send_error(err)
+        raise err
 
     cmd = [
         'python3',
