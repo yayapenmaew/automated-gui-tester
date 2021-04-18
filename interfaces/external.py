@@ -41,7 +41,7 @@ fieldNameMapper = {
 class ExternalOutputInterface:
     def __init__(self, endpoint=None):
         if not endpoint:
-            logging.warning("External endpoint is not specifed, the result will be displayed on stdin")
+            logging.warning("External endpoint is not specifed, the result will be displayed on stdout")
         self.endpoint = endpoint
 
     def __send_request(self, payload):
@@ -75,7 +75,7 @@ class ExternalOutputInterface:
     def send_error(self, exception):
         payload = { 
             "status": "error",
-            "error": exception.__class__.__name__
+            "error": exception.__class__.__name__,
         }
 
         self.__send_request(payload)
