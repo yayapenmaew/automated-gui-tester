@@ -82,10 +82,12 @@ class DynamicTestingApplication:
         app_controller.delay(3)
 
         '''Click on search bar'''
-        search_box = app_controller.highlevel_query.find_by_classname(Widget.TEXT_VIEW, {
-            "text": re.compile("Search", re.IGNORECASE)
-        })[0]
-        search_box.click()
+        search_box = []
+        while not search_box:
+            search_box = app_controller.highlevel_query.find_by_classname(Widget.TEXT_VIEW, {
+                "text": re.compile("Search", re.IGNORECASE)
+            })
+        search_box[0].click()
         app_controller.delay(2)
 
         '''Enter app identifier into the search bar'''
