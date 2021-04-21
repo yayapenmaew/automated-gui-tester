@@ -48,7 +48,9 @@ class ExternalOutputInterface:
         if self.endpoint:
             res = req.post(self.endpoint, json=payload)
         else:
+            print('-----BEGIN JSON OUTPUT-----')
             print(json.dumps(payload))
+            print('-----END JSON OUTPUT-----')
 
     def create_app_info_payload(self, app_id, app_name, dev_name, icon_url, category):
         return {
