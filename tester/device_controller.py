@@ -126,7 +126,7 @@ class DeviceController:
         self.__adb_shell("cp", base_apk_path, temp_apk_path)
 
         # Dump apk
-        cmd = f"{adb_path} pull {temp_apk_path} {file_path}"
+        cmd = f"{adb_path} -s {self.device_name} pull {temp_apk_path} {file_path}"
         os.system(cmd)
 
         self.__adb_shell("rm", temp_apk_path)
