@@ -1,5 +1,6 @@
 from ..app_controller import AppController
 from ..highlevel_query import Widget
+import random
 
 
 '''Rule Interface'''
@@ -7,7 +8,7 @@ from ..highlevel_query import Widget
 
 class Rule:
     def name(self) -> str:
-        pass
+        return self.__class__.__name__
 
     def description(self) -> str:
         pass
@@ -20,8 +21,8 @@ class Rule:
 
 
 class ViewPagerRule(Rule):
-    def name(self):
-        return "Found ViewPager"
+    # def name(self):
+    #     return "Found ViewPager"
 
     def description(self):
         return "Swipe left 5 times then back"
@@ -38,8 +39,8 @@ class ViewPagerRule(Rule):
 
 class ImageButtonRule(Rule):
 
-    def name(self):
-        return "Found ImageButton"
+    # def name(self):
+    #     return "Found ImageButton"
 
     def description(self):
         return "Click the button once"
@@ -63,8 +64,8 @@ class ActionBarRule(Rule):
         self.tabVisited = set()
         self.finished = False
 
-    def name(self):
-        return "Found ActionBar (Tabs)"
+    # def name(self):
+    #     return "Found ActionBar (Tabs)"
 
     def description(self):
         return "Loop through all tabs"
@@ -91,9 +92,9 @@ class ActionBarRule(Rule):
 
 
 class SkipButtonRule(Rule):
-    
-    def name(self):
-        return "Found Skip button"
+
+    # def name(self):
+    #     return "Found Skip button"
 
     def description(self):
         return "Press the skip button"
@@ -110,6 +111,37 @@ class SkipButtonRule(Rule):
         pass
 
 
+class RandomTouchRule(Rule):
+    # def name(self):
+    #     return "Randomly touch the screen"
+    def __init__(self, random_rate=0.3):
+        self.random_rate = random_rate
+
+    def description(self):
+        return "Randomly touch the screen"
+
+    def match(self, app_controller: AppController):
+        return random.random() < self.random_rate
+
+    def action(self, app_controller: AppController):
+        app_controller.random_touch()
+
+
+class RandomClickElementRule(Rule):
+    # def name(self):
+    #     return "Randomly touch the screen"
+    def __init__(self, random_rate=0.3):
+        self.random_rate = random_rate
+
+    def description(self):
+        return "Randomly click an element on the screen"
+
+    def match(self, app_controller: AppController):
+        return random.random() < self.random_rate
+
+    def action(self, app_controller: AppController):
+        app_controller.click_random_elements()
+
 
 def initialize_rules():
     rules = [
@@ -117,5 +149,7 @@ def initialize_rules():
         ImageButtonRule(),
         ActionBarRule(),
         SkipButtonRule(),
+        RandomTouchRule(),
+        RandomClickElementRule(),
     ]
     return rules
