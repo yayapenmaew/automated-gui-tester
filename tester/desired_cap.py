@@ -14,5 +14,10 @@ class AndroidDesiredCapabilities:
             "clearSystemFiles": True,
             "proxyPort": proxy_port,
             "systemPort": system_port,
-            "appiumPort": appium_port
+            "appiumPort": appium_port,
+            'autoGrantPermissions': True,
+            'fullReset': False,
+            'unicodeKeyboard': True,
+            'resetKeyboard': True,
+            'isHeadless': False,
         }

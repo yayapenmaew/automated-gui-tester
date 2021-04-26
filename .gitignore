@@ -7,7 +7,7 @@ result/
 apk/
 app_icons/
 app_info/
-
+benchmark/.gradle
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
