@@ -46,6 +46,11 @@ class DeviceController:
         cmd = f"{adb_path} -s {self.device_name} install -r {apk_path}"
         os.system(cmd)
 
+    def __adb_uninstall(self, package_name):
+        """Uninstall the app from the device"""
+        cmd = f"{adb_path} -s {self.device_name} uninstall {package_name}"
+        os.system(cmd)
+
     def __adb_shell(self, *commands):
         cmd = f"{adb_path} -s {self.device_name} shell {' '.join(commands)}"
         os.system(cmd)
@@ -87,15 +92,19 @@ class DeviceController:
             "keyevent KEYCODE_BACK"
         )
 
-    def reboot(self):
+    def reboot(self, with_unlock=False):
         """Reboot and do some necessary things"""
         self.__adb_reboot()
         self.wait_until_online()
-        time.sleep(10)
-        self.unlock()
+        if with_unlock:
+            time.sleep(10)
+            self.unlock()
 
     def install_apk(self, apk_path):
         self.__adb_install(apk_path)
+
+    def uninstall(self, package_name):
+        self.__adb_uninstall(package_name)
 
     def get_default_activity_of(self, package_name):
         cmd = [adb_path, "-s", self.device_name, "shell", "cmd", "package",

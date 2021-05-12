@@ -155,7 +155,7 @@ class DynamicTestingApplication:
 
         return app_name, dev_name, app_cat
 
-    def test(self, apk_path, action_count=10, install=True, debug=False, activity=None, install_type="apk", dump_apk=True, dump_manifest=True):
+    def test(self, apk_path, action_count=10, install=True, debug=False, activity=None, install_type="apk", dump_apk=True, dump_manifest=True, proxy=True, reset_state=True):
         if not self.device_controller.is_online():
             raise Exception('The testing device is offine')
 
@@ -206,10 +206,11 @@ class DynamicTestingApplication:
                     f"The application will be started with the activity {activity}")
 
         '''Initialize a proxy server'''
-        proxy_port = self.desired_cap['proxyPort']
-        logging.info(f"Setting wifi proxy to {self.proxy_host}:{proxy_port}")
-        self.device_controller.set_wifi_proxy(self.proxy_host, proxy_port)
-        proxy_controller = ProxyController(proxy_port, package_name)
+        if proxy:
+            proxy_port = self.desired_cap['proxyPort']
+            logging.info(f"Setting wifi proxy to {self.proxy_host}:{proxy_port}")
+            self.device_controller.set_wifi_proxy(self.proxy_host, proxy_port)
+            proxy_controller = ProxyController(proxy_port, package_name)
 
         app_controller = AppController(
             extended_desired_cap, package_name, activity)
@@ -228,7 +229,13 @@ class DynamicTestingApplication:
 
         '''Cleaning up'''
         logging.info('Cleaning up')
-        self.device_controller.set_wifi_proxy()  # Set back to default
+        if proxy:
+            self.device_controller.set_wifi_proxy()  # Set back to default
+        if reset_state:
+            logging.info('Uninstalling the application')
+            self.device_controller.uninstall(package_name)
+            logging.info('Rebooting the device')
+            self.device_controller.reboot()
 
         logging.info('The application has been tested sucessfully')
 
