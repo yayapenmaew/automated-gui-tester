@@ -11,7 +11,7 @@ import re
 import logging
 from progressbar import progressbar
 from .exceptions import PaidAppError
-from .playstore_helper import get_category_from_tags
+from .playstore_helper import get_cat_slug
 
 
 class DynamicTestingApplication:
@@ -125,7 +125,7 @@ class DynamicTestingApplication:
         app_tags = app_controller.highlevel_query.find_by_classname(
             Widget.BUTTON)
         app_tags = list(map(lambda elem: elem.get_attribute('text'), app_tags))
-        app_cat = get_category_from_tags(app_tags)
+        app_cat = get_cat_slug(app_tags)
         logging.info(f"Tags: {', '.join(app_tags)}")
         logging.info(f"Category: {app_cat}")
 
