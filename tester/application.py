@@ -10,7 +10,7 @@ import time
 import re
 import logging
 from progressbar import progressbar
-from .exceptions import DeviceOfflineError, GamesNotSupportedError, NotSupportedError, PaidAppError
+from .exceptions import AppNotFoundError, DeviceOfflineError, GamesNotSupportedError, NotSupportedError, PaidAppError
 from .playstore_helper import get_cat_slug
 
 
@@ -105,6 +105,12 @@ class DynamicTestingApplication:
         while not results:
             results = app_controller.highlevel_query.find_by_classname(
                 Widget.LINEAR_LAYOUT, {"clickable": True})
+            
+            no_result = len(app_controller.highlevel_query.find_by_classname(
+                Widget.TEXT_VIEW, {"text": re.compile("No results for")})) > 0
+            if no_result:
+                raise AppNotFoundError
+
             app_controller.delay(3)
 
         '''Skip advertisement and suggestion results'''
