@@ -58,7 +58,7 @@ PII_TYPE = {
     "Username": { "group": PI_GROUP.USER },
     "Video": { "group": PI_GROUP.USER },
     "Web Browsing Log": { "group": PI_GROUP.USER },
-    "GPS (current latitude and longitude)": { "group": PI_GROUP.USER },
+    "GPS (current latitude and longitude)": { "group": PI_GROUP.LOCATION },
 }
 
 
