@@ -6,7 +6,7 @@ import pathlib
 import time
 import json
 from analyzer.PI_detection import VULPIXAnalyzer
-from tester.exceptions import TimeOutError, VULPIXAnalyzerError, ExternalInterfaceError, PaidAppError, resolve_exit_code, BadInputError
+from tester.exceptions import EXIT_CODE, TimeOutError, VULPIXAnalyzerError, ExternalInterfaceError, PaidAppError, resolve_exit_code, BadInputError
 from interfaces.external import ExternalOutputInterface
 from validator.validator import InputValidator
 import logging
@@ -40,10 +40,12 @@ class RunCmd(threading.Thread):
             try:
                 exception = resolve_exit_code(self.p.returncode)
                 result_interface.send_error(exception)
-                raise exception
+                logging.error(exception)
+                exit(self.p.returncode)
             except:
-                raise Exception(
+                logging.error(
                     f"Unexpected error on the tester subprocess. The error details are saved to log file.")
+                exit(self.p.returncode)
 
 
 parser = argparse.ArgumentParser()
@@ -127,7 +129,8 @@ if __name__ == '__main__':
         score, result = VULPIXAnalyzer.analyze(args.app_id)
     except:
         result_interface.send_error(VULPIXAnalyzerError)
-        raise VULPIXAnalyzerError
+        logging.error(VULPIXAnalyzerError)
+        exit(EXIT_CODE.ANALYZER_ERROR)
 
     logs_path = {
         "appium": os.path.join(pathlib.Path(__file__).parent.absolute(), 'log_appium', args.app_id + '.log'),
@@ -157,4 +160,5 @@ if __name__ == '__main__':
         )
     except:
         result_interface.send_error(ExternalInterfaceError)
-        raise ExternalInterfaceError
+        logging.error(ExternalInterfaceError)
+        exit(EXIT_CODE.EXTERNAL_INTERFACE_ERROR)

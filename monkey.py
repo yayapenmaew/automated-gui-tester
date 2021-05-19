@@ -75,12 +75,8 @@ if __name__ == '__main__':
         app.test(
             args.app_id,
             install_type='playstore',
+            reset_state=False,
         )
-    except PaidAppError as exception:
-        logging.error('Paid app is not supported')
+    except Exception as exception:
+        logging.error('Unexpected error while performing dynamic test', exception)
         sys.exit(exception.exit_code)
-        raise PaidAppError
-    except:
-        logging.error('Unexpected error while performing dynamic test')
-        sys.exit(exception.exit_code)
-        raise DynamicTestError
