@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from tester.application import DynamicTestingApplication
 from tester.app_controller import AppController
-from tester.rules.rules import initialize_rules
+from tester.rules.rules import initialize_rules, BackToAppRule
 from tester.rules.visual_state import VisualState, VisualStateGraph, ETVisualState
 import threading
 import time
@@ -19,32 +19,52 @@ from benchmark.benchmark import COSMOBenchmark
 
 class TesterConfig:
     DEVICE_NAME = "K6T6R17909001485"
+    # DEVICE_NAME = "192.168.1.33:5555"
     PROXY_HOST = "192.168.1.249"
     ANDROID_VERSION = "7.0"
-    N_ACTIONS = 10
+    N_ACTIONS = 50
     ALWAYS_INSTALL_APP = False
-    APPLICATION = "protect.budgetwatch"
-    SOURCE_PATH = "/Users/nisaruj/Desktop/COSMO/budget-watch"
+    APPLICATION = "org.secuso.privacyfriendlynetmonitor"
+    SOURCE_PATH = "/Users/nisaruj/Desktop/COSMO/app_source/privacy-friendly-netmonitor"
 
 class GeneticOptimizer(BaseGeneticOptimizer):
-    def __init__(self, random_state=None, debug=False):
-        rules = initialize_rules()
+    def __init__(self, random_state=None, debug=False, app_id=TesterConfig.APPLICATION):
+        rules = initialize_rules(exclude = ["BackToAppRule"])
+        self.installed = False
+        self.app_id = app_id
 
         super().__init__(rules, random_state, debug)
 
+    def __append_result(self, app_name, rule, codecov_score=0, state_score=0, filename="ga_scores.txt"):
+        with open(filename, "a") as fp:
+            fp.write(app_name + "\t" + str(rule) + "\t" + str(codecov_score) + "\t" + str(state_score) + "\n")
+
     def fitness(self, agent):
         print(agent)
-        selected_rules = []
+        selected_rules = [BackToAppRule()]
         for i in range(len(self.rules)):
             if agent[i]:
                 selected_rules.append(self.rules[i])
-        score = run_benchmark(selected_rules)
-        print('Score:', score)
-        return score
+
+        # codecov_score = run_benchmark(selected_rules, mode="coverage")
+        try:
+            state_score = run_benchmark(selected_rules, self.app_id, mode="state", install=(not self.installed))
+        except Exception as e:
+            print('Error:', str(e))
+            state_score = -1
+        self.installed = True
+        # state_score, codecov_score = run_benchmark(selected_rules, mode="both")
+
+        self.__append_result(self.app_id, agent, state_score=state_score, filename="ga_benchmark.txt")
+        time.sleep(5)
+
+        print('Score:', state_score)
+        return state_score
 
 
-def run_benchmark(rules):
-    COSMOBenchmark.preparing_benchmark(TesterConfig.APPLICATION)
+def run_benchmark(rules, app_id, mode = "coverage", install=False):
+    if mode == "coverage" or mode == "both":
+        COSMOBenchmark.preparing_benchmark(app_id)
 
     app = DynamicTestingApplication(
             udid=TesterConfig.DEVICE_NAME,
@@ -61,11 +81,13 @@ def run_benchmark(rules):
 
     app.set_action_count(TesterConfig.N_ACTIONS)
 
-    # states = VisualStateGraph()
+    if mode == "state" or mode == "both":
+        states = VisualStateGraph()
     def on_perform(app_controller: AppController, step):
         
-        # current_state = VisualState(app_controller)
-        # states.add_transition(current_state)
+        if mode == "state" or mode == "both":
+            current_state = VisualState(app_controller)
+            states.add_transition(current_state)
 
         for rule in rules:
             try:
@@ -75,23 +97,39 @@ def run_benchmark(rules):
             except KeyboardInterrupt:
                 return
             except:
-                logging.error('Rule', rule.name(),
-                                'error, try to posepone...')
+                pass
+                # logging.error('Rule', rule.name(),
+                #                 'error, try to posepone...')
 
     app.foreach(on_perform)
 
     app.test(
-        TesterConfig.APPLICATION,
+        app_id,
         install_type='playstore',
-        install=TesterConfig.ALWAYS_INSTALL_APP
+        install=install,
+        proxy=False,
+        reset_state=False
     )
 
-    # return len(states.nodes())
-
-    code_cov, detailed_cov = COSMOBenchmark.generate_report(TesterConfig.APPLICATION, TesterConfig.SOURCE_PATH)
-    return code_cov
+    if mode == "state":
+        return len(states.nodes())
+    elif mode == "coverage":
+        code_cov, detailed_cov = COSMOBenchmark.generate_report(app_id, TesterConfig.SOURCE_PATH)
+        return code_cov
+    elif mode == "both":
+        code_cov, detailed_cov = COSMOBenchmark.generate_report(app_id, TesterConfig.SOURCE_PATH)
+        return len(states.nodes()), code_cov
 
 if __name__ == '__main__':
-    # print('# of states:', run_benchmark(initialize_rules()))
-    optimizer = GeneticOptimizer(debug=True)
-    optimizer.optimize(n_gen=1, pop_size=4, n_parents=2)
+    app_list = sys.argv[1]
+    with open(app_list, 'r') as fp:
+        for line in fp:
+            app_id = line.strip()
+            if '%' in app_id:
+                continue
+            try:
+                optimizer = GeneticOptimizer(debug=True, app_id=app_id)
+                optimizer.optimize(n_gen=3, pop_size=4, n_parents=2)
+            except KeyboardInterrupt:
+                print('Terminating ...')
+                break
