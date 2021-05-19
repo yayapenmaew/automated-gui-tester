@@ -10,7 +10,7 @@ import time
 import re
 import logging
 from progressbar import progressbar
-from .exceptions import DeviceOfflineError, NotSupportedError, PaidAppError
+from .exceptions import DeviceOfflineError, GamesNotSupportedError, NotSupportedError, PaidAppError
 from .playstore_helper import get_cat_slug
 
 
@@ -106,12 +106,14 @@ class DynamicTestingApplication:
             results = app_controller.highlevel_query.find_by_classname(
                 Widget.LINEAR_LAYOUT, {"clickable": True})
             app_controller.delay(3)
+
         '''Skip advertisement and suggestion results'''
         result_offset = len(app_controller.highlevel_query.find_by_classname(
             Widget.VIEW, {"contentDescription": re.compile("\nAd\n")}))
         result_offset += len(app_controller.highlevel_query.find_by_classname(
             Widget.TEXT_VIEW, {"text": "Did you mean:"}))
 
+        results[result_offset].click()
         app_controller.delay(3)
 
         '''Retrieve app information'''
@@ -158,12 +160,17 @@ class DynamicTestingApplication:
         if not self.device_controller.is_online():
             raise DeviceOfflineError
 
+        self.device_controller.set_wifi_proxy()
+
         '''Install the application'''
         if install:
             if install_type == "apk":
                 self.device_controller.install_apk(apk_path)
             elif install_type == "playstore":
                 app_name, dev_name, app_cat = self.install_via_playstore(apk_path)
+
+                if app_cat == 'games':
+                    raise GamesNotSupportedError
 
                 '''Dump apk'''
                 if dump_apk:
@@ -207,7 +214,7 @@ class DynamicTestingApplication:
             logging.info(
                     f"The application will be started with the activity {activity}")
 
-        self.device_controller.set_wifi_proxy()
+
         '''Initialize a proxy server'''
         if proxy:
             proxy_port = self.desired_cap['proxyPort']

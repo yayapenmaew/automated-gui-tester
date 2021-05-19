@@ -5,6 +5,7 @@ class EXIT_CODE:
     TIMEOUT_ERROR = 11
     PAID_APP_ERROR = 12
     NOT_SUPPORTED_ERROR = 13
+    GAMES_CAT_ERROR = 14
     ANALYZER_ERROR = 20
     EXTERNAL_INTERFACE_ERROR = 30
     BAD_INPUT_ERROR = 40
@@ -45,6 +46,12 @@ class NotSupportedError(Exception):
         super().__init__(message)
 
 
+class GamesNotSupportedError(Exception):
+    def __init__(self, message="Game applications not supported"):
+        self.exit_code = EXIT_CODE.GAMES_CAT_ERROR
+        super().__init__(message)
+
+
 class VULPIXAnalyzerError(Exception):
     def __init__(self, message="Error while analyzing the traffic"):
         self.exit_code = EXIT_CODE.ANALYZER_ERROR
@@ -71,6 +78,7 @@ def resolve_exit_code(exit_code):
         EXIT_CODE.TIMEOUT_ERROR: TimeOutError(),
         EXIT_CODE.PAID_APP_ERROR: PaidAppError(),
         EXIT_CODE.NOT_SUPPORTED_ERROR: NotSupportedError(),
+        EXIT_CODE.GAMES_CAT_ERROR: GamesNotSupportedError(),
         EXIT_CODE.ANALYZER_ERROR: VULPIXAnalyzerError(),
         EXIT_CODE.EXTERNAL_INTERFACE_ERROR: ExternalInterfaceError(),
         EXIT_CODE.BAD_INPUT_ERROR: BadInputError(),
