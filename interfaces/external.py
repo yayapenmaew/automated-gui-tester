@@ -67,7 +67,7 @@ class ExternalOutputInterface:
             "version": app_version,
             "androidVersion": android_version,
             "vulpixScore": score,
-            "testingMethod": "2.0",
+            "testingMethod": "DYNAMIC_ONLY",
         }
 
         for PI in PI_result:
