@@ -108,8 +108,16 @@ class DynamicTestingApplication:
             app_controller.delay(3)
 
         '''Skip advertisement and suggestion results'''
-        result_offset = len(app_controller.highlevel_query.find_by_classname(
-            Widget.VIEW, {"contentDescription": re.compile("\nAd\n")}))
+        app_list = app_controller.highlevel_query.find_by_classname(Widget.VIEW)
+        result_offset = 0
+        for app in app_list:
+            app_detail = app.get_attribute('contentDescription')
+            if not app_detail:
+                continue
+            if "App: " in app_detail and "\nAd\n" not in app_detail:
+                break
+            result_offset += 1
+        
         result_offset += len(app_controller.highlevel_query.find_by_classname(
             Widget.TEXT_VIEW, {"text": "Did you mean:"}))
 
