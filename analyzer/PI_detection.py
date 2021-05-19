@@ -27,38 +27,38 @@ class PI_GROUP:
 # PI elements that we are interest
 
 PII_TYPE = {
-    "Advertiser ID": { "group": PI_GROUP.DEVICE },
-    "Android ID": { "group": PI_GROUP.DEVICE },
-    "Device Serial Number": { "group": PI_GROUP.DEVICE },
-    "Google Services Framework ID": { "group": PI_GROUP.DEVICE },
-    "IMEI": { "group": PI_GROUP.DEVICE },
-    "MAC Address": { "group": PI_GROUP.DEVICE },
-    "Cell ID": { "group": PI_GROUP.SIMCARD },
-    "ICCID (SIM serial number)": { "group": PI_GROUP.SIMCARD },
-    "IMSI": { "group": PI_GROUP.SIMCARD },
-    "Location Area Code": { "group": PI_GROUP.SIMCARD },
-    "Phone Number": { "group": PI_GROUP.SIMCARD },
-    "Age": { "group": PI_GROUP.USER },
-    "Audio Recording": { "group": PI_GROUP.USER },
-    "Calendar": { "group": PI_GROUP.USER },
-    "Contract Book": { "group": PI_GROUP.USER },
-    "Country": { "group": PI_GROUP.USER },
-    "Credit Card CCV": { "group": PI_GROUP.USER },
-    "Date Of Birth": { "group": PI_GROUP.USER },
-    "Email": { "group": PI_GROUP.USER },
-    "Gender": { "group": PI_GROUP.USER },
-    "Name": { "group": PI_GROUP.USER },
-    "Password": { "group": PI_GROUP.USER },
-    "Photo": { "group": PI_GROUP.USER },
-    "Physical Address": { "group": PI_GROUP.USER },
-    "Relationship Status": { "group": PI_GROUP.USER },
-    "SMS Message": { "group": PI_GROUP.USER },
-    "SSN": { "group": PI_GROUP.USER },
-    "Time Zone": { "group": PI_GROUP.USER },
-    "Username": { "group": PI_GROUP.USER },
-    "Video": { "group": PI_GROUP.USER },
-    "Web Browsing Log": { "group": PI_GROUP.USER },
-    "GPS (current latitude and longitude)": { "group": PI_GROUP.LOCATION },
+    "Advertiser ID": { "group": PI_GROUP.DEVICE, "impact": True },
+    "Android ID": { "group": PI_GROUP.DEVICE, "impact": True },
+    "Device Serial Number": { "group": PI_GROUP.DEVICE, "impact": True },
+    "Google Services Framework ID": { "group": PI_GROUP.DEVICE, "impact": True },
+    "IMEI": { "group": PI_GROUP.DEVICE, "impact": True },
+    "MAC Address": { "group": PI_GROUP.DEVICE, "impact": True },
+    "Cell ID": { "group": PI_GROUP.SIMCARD, "impact": True },
+    "ICCID (SIM serial number)": { "group": PI_GROUP.SIMCARD, "impact": True },
+    "IMSI": { "group": PI_GROUP.SIMCARD, "impact": True },
+    "Location Area Code": { "group": PI_GROUP.SIMCARD, "impact": True },
+    "Phone Number": { "group": PI_GROUP.SIMCARD, "impact": True },
+    "Age": { "group": PI_GROUP.USER, "impact": False },
+    "Audio Recording": { "group": PI_GROUP.USER, "impact": False },
+    "Calendar": { "group": PI_GROUP.USER, "impact": False },
+    "Contract Book": { "group": PI_GROUP.USER, "impact": False },
+    "Country": { "group": PI_GROUP.USER, "impact": False },
+    "Credit Card CCV": { "group": PI_GROUP.USER, "impact": True },
+    "Date Of Birth": { "group": PI_GROUP.USER, "impact": False },
+    "Email": { "group": PI_GROUP.USER, "impact": True },
+    "Gender": { "group": PI_GROUP.USER, "impact": False },
+    "Name": { "group": PI_GROUP.USER, "impact": True },
+    "Password": { "group": PI_GROUP.USER, "impact": False },
+    "Photo": { "group": PI_GROUP.USER, "impact": False },
+    "Physical Address": { "group": PI_GROUP.USER, "impact": True },
+    "Relationship Status": { "group": PI_GROUP.USER, "impact": False },
+    "SMS Message": { "group": PI_GROUP.USER, "impact": False },
+    "SSN": { "group": PI_GROUP.USER, "impact": True },
+    "Time Zone": { "group": PI_GROUP.USER, "impact": False },
+    "Username": { "group": PI_GROUP.USER, "impact": False },
+    "Video": { "group": PI_GROUP.USER, "impact": False },
+    "Web Browsing Log": { "group": PI_GROUP.USER, "impact": False },
+    "GPS (current latitude and longitude)": { "group": PI_GROUP.LOCATION, "impact": False },
 }
 
 
@@ -273,7 +273,12 @@ class VULPIXAnalyzer():
         }
         for PI_element in PII_TYPE:
             pi_group = PII_TYPE[PI_element]['group']
-            leaks_by_group[pi_group] += PI_result[PI_element]
+            ''' Full 25 points for high impact PI '''
+            high_impact = PII_TYPE[PI_element]['impact']
+            if high_impact:
+                leaks_by_group[pi_group] += 4
+            else:
+                leaks_by_group[pi_group] += PI_result[PI_element]
 
         VULPIX_score = 0
         for group in leaks_by_group:
