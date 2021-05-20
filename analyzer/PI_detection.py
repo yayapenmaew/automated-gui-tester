@@ -275,7 +275,7 @@ class VULPIXAnalyzer():
             pi_group = PII_TYPE[PI_element]['group']
             ''' Full 25 points for high impact PI '''
             high_impact = PII_TYPE[PI_element]['impact']
-            if high_impact:
+            if high_impact and PI_result[PI_element]:
                 leaks_by_group[pi_group] += 4
             else:
                 leaks_by_group[pi_group] += PI_result[PI_element]
