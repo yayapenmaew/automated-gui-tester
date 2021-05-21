@@ -75,7 +75,7 @@ if __name__ == '__main__':
         app.test(
             args.app_id,
             install_type='playstore',
-            reset_state=False,
+            reset_state=True,
         )
     except Exception as exception:
         logging.error('Unexpected error while performing dynamic test', exception)

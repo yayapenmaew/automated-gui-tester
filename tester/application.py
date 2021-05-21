@@ -258,8 +258,8 @@ class DynamicTestingApplication:
         if reset_state:
             logging.info('Uninstalling the application')
             self.device_controller.uninstall(package_name)
-            logging.info('Rebooting the device')
-            self.device_controller.reboot()
+            # logging.info('Rebooting the device')
+            # self.device_controller.reboot()
 
         logging.info('The application has been tested sucessfully')
 
