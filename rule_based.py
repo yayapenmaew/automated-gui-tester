@@ -15,18 +15,6 @@ from tester.exceptions import DynamicTestError, PaidAppError
 from dotenv import load_dotenv, find_dotenv
 import sys
 
-
-# def on_perform(app_controller: AppController, step):
-#     logging.debug(f"Step {step}")
-#     print('Fetching state')
-#     current_state = VisualState(app_controller)
-#     print('Fetched state')
-#     states.add_transition(current_state)
-#     print(states.nodes())
-#     states.show()
-#     time.sleep(1)
-
-
 load_dotenv(find_dotenv())
 
 parser = argparse.ArgumentParser()
@@ -72,7 +60,6 @@ if __name__ == '__main__':
             system_port=args.system_port,
             proxy_port=args.proxy_port,
             appium_port=args.appium_port,
-            # Linux user: plz change this line!
             mitm_path=os.environ.get("MITM_PATH"),
         )
 
@@ -82,37 +69,36 @@ if __name__ == '__main__':
             java_home=os.environ.get("JAVA_HOME")
         )
 
-        action_count = 30
+        action_count = 50
         app.set_action_count(action_count)
 
-        rules = initialize_rules()
-
-        # states = VisualStateGraph()
-        # plt.show()
+        rules = initialize_rules(include=[
+            "ViewPagerRule",
+            "ImageButtonRule",
+            "ActionBarRule",
+            "RandomClickElementRule",
+            "FillTextFieldsRule",
+            "BackToAppRule",
+        ])
 
         def on_perform(app_controller: AppController, step):
             for rule in rules:
                 try:
                     if rule.match(app_controller):
-                        print(rule.name())
                         rule.action(app_controller)
                 except KeyboardInterrupt:
                     return
                 except:
-                    logging.error('Rule', rule.name(),
-                                  'error, try to posepone...')
+                    pass
 
         app.foreach(on_perform)
 
         app.test(
             args.app_id,
             install_type='playstore',
+            reset_state=True,
         )
-    except PaidAppError as exception:
-        logging.error('Paid app is not supported')
+    except Exception as exception:
+        logging.error(
+            'Unexpected error while performing dynamic test', exception)
         sys.exit(exception.exit_code)
-        raise PaidAppError
-    except:
-        logging.error('Unexpected error while performing dynamic test')
-        sys.exit(exception.exit_code)
-        raise DynamicTestError

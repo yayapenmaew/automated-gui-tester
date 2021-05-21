@@ -52,9 +52,10 @@ class ImageButtonRule(Rule):
 
 
 class ActionBarRule(Rule):
-    def __init__(self):
+    def __init__(self, transition_rate=0.5):
         self.tabVisited = set()
         self.finished = False
+        self.random_rate = transition_rate
 
     def description(self):
         return "Loop through all tabs"
@@ -64,7 +65,8 @@ class ActionBarRule(Rule):
             return False
         tabs = app_controller.highlevel_query.find_by_classname(
             Widget.ACTION_BAR)
-        return 0 < len(self.tabVisited) < len(tabs) if len(self.tabVisited) else len(tabs)
+        to_click = random.random() < self.random_rate
+        return 0 < len(self.tabVisited) < len(tabs) if len(self.tabVisited) and to_click else len(tabs)
 
     def action(self, app_controller: AppController):
         tabs = app_controller.highlevel_query.find_by_classname(
@@ -226,7 +228,6 @@ class LoopThroughMenuRule(Rule):
         return "Loop through menu items if exist"
 
     def match(self, app_controller: AppController):
-        return False
         if not self.has_menu:
             self.has_menu = app_controller.highlevel_query.has_navigation_menu()
         return self.has_menu and random.random() < self.random_rate
@@ -240,17 +241,20 @@ class LoopThroughMenuRule(Rule):
             pass
 
 
-def initialize_rules(exclude=[]):
+def initialize_rules(include=None, exclude=[]):
     rules = [
-        ViewPagerRule(),
-        ImageButtonRule(),
-        ActionBarRule(),
-        SkipButtonRule(),
-        RandomTouchRule(),
-        RandomClickElementRule(),
-        BackToAppRule(),
-        FillTextFieldsRule(),
-        LoopThroughMenuRule(),
-        RandomBackRule(),
+            ViewPagerRule(),
+            ImageButtonRule(),
+            ActionBarRule(),
+            SkipButtonRule(),
+            RandomTouchRule(),
+            RandomClickElementRule(),
+            BackToAppRule(),
+            FillTextFieldsRule(),
+            LoopThroughMenuRule(),
+            RandomBackRule(),
     ]
+    if include:
+        rules = list(filter(lambda rule: rule.__class__.__name__ in include, rules))
+        
     return list(filter(lambda rule: rule.__class__.__name__ not in exclude, rules))

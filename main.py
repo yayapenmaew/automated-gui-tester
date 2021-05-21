@@ -11,7 +11,7 @@ from interfaces.external import ExternalOutputInterface
 from validator.validator import InputValidator
 import logging
 
-TIMEOUT_SEC = 5 * 60
+TIMEOUT_SEC = 15 * 60
 
 
 class RunCmd(threading.Thread):
@@ -68,6 +68,8 @@ parser.add_argument('--appium_port', metavar='appium_port',
 
 parser.add_argument('--timeout', metavar='timeout',
                     type=int, help='Timeout (second)', default=TIMEOUT_SEC)
+parser.add_argument('--mode', metavar='mode',
+                    type=str, help='Test mode (monkey, ga)', default="ga")
 parser.add_argument('--endpoint', metavar='endpoint',
                     type=str, help='Endpoint at which the result will be sent (Example: http://127.0.0.1:80/sendResult)', default=None)
 
@@ -106,9 +108,17 @@ if __name__ == '__main__':
         result_interface.send_error(err)
         raise err
 
+    try:
+        script_to_run = {
+            "ga": "rule_based.py",
+            "monkey": "monkey.py"
+        }[args.mode]
+    except:
+        raise Exception('Invalid mode. It must be either monkey or ga')
+
     cmd = [
         'python3',
-        './monkey.py',
+        script_to_run,
         args.device_name,
         args.app_id,
         args.proxy_host,
