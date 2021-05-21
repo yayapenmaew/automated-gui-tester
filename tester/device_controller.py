@@ -1,5 +1,6 @@
 from subprocess import Popen, PIPE
 import os
+import subprocess
 import time
 import logging
 import zipfile
@@ -188,3 +189,8 @@ class DeviceController:
         logging.info(f"Extracted the manifest from the apk. Got {result}")
 
         return result
+
+    def get_all_installed_packages(self):
+        packages = subprocess.check_output("adb shell 'pm list packages -f' | sed -e 's/.*=//' | sort", shell=True).decode()
+        return [p.strip() for p in packages.split('\n')]
+
