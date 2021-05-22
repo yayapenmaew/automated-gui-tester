@@ -83,7 +83,7 @@ class ExternalOutputInterface:
 
         self.__send_request(payload)
 
-    def send_result(self, app_id, app_name, app_version, android_version, score, PI_result, dev_name, icon_url, category, log_path):
+    def send_result(self, app_id, app_name, app_version, android_version, score, PI_result, dev_name, icon_url, category, log_path, uuid=None):
         app_info = self.create_app_info_payload(
             app_id,
             app_name,
@@ -99,6 +99,8 @@ class ExternalOutputInterface:
             score,
             PI_result,
         )
+        if uuid:
+            result["uuid"] = uuid
 
         payload = {
             "status": "success",

@@ -72,6 +72,9 @@ parser.add_argument('--mode', metavar='mode',
                     type=str, help='Test mode (monkey, ga)', default="ga")
 parser.add_argument('--endpoint', metavar='endpoint',
                     type=str, help='Endpoint at which the result will be sent (Example: http://127.0.0.1:80/sendResult)', default=None)
+parser.add_argument('--uuid', metavar='uuid',
+                    type=str, help='uuid', default=None)
+
 
 """
 Example call:
@@ -167,6 +170,7 @@ if __name__ == '__main__':
             logs_path["app_icon"],
             app_info["category"],
             logs_path,
+            args.uuid
         )
     except:
         result_interface.send_error(ExternalInterfaceError)
