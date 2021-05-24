@@ -317,23 +317,23 @@ class VULPIXAnalyzer():
             found_PI = False
 
             for i in range(Entries_size):
-                if found_PI:
+                # if found_PI:
 
-                    utc_datetime_start = startTime.split("T")[1]
-                    utc_datetime_found = found_PI_time.split("T")[1]
-                    utc_datetime_start = utc_datetime_start.split('.')[
-                        0]
-                    utc_datetime_found = utc_datetime_found.split('.')[
-                        0]
+                #     utc_datetime_start = startTime.split("T")[1]
+                #     utc_datetime_found = found_PI_time.split("T")[1]
+                #     utc_datetime_start = utc_datetime_start.split('.')[
+                #         0]
+                #     utc_datetime_found = utc_datetime_found.split('.')[
+                #         0]
 
-                    utc_datetime_start = utc_datetime_start.split(':')[
-                        1]
-                    utc_datetime_found = utc_datetime_found.split(':')[
-                        1]
+                #     utc_datetime_start = utc_datetime_start.split(':')[
+                #         1]
+                #     utc_datetime_found = utc_datetime_found.split(':')[
+                #         1]
 
-                    print(int(utc_datetime_found) -
-                          int(utc_datetime_start))
-                    break
+                #     print(int(utc_datetime_found) -
+                #           int(utc_datetime_start))
+                #     break
 
                 request = Packets[i]["request"]
                 url = request["url"]
