@@ -74,6 +74,11 @@ parser.add_argument('--endpoint', metavar='endpoint',
                     type=str, help='Endpoint at which the result will be sent (Example: http://127.0.0.1:80/sendResult)', default=None)
 parser.add_argument('--uuid', metavar='uuid',
                     type=str, help='uuid', default=None)
+parser.add_argument('--latest_version', metavar="latest_version", type=str,
+                    help="Latest version of the application. The script will terminate \
+                    if the downloaded app has the same version as latest_version", default=None)
+parser.add_argument('--force', dest='force', action="store_true",
+                    help='Ignore latest_version checking and force the script to test', default=False)
 
 
 """
@@ -135,9 +140,15 @@ if __name__ == '__main__':
         str(args.appium_port)
     ]
 
+    if not args.force and args.latest_version:
+        cmd.extend([
+            '--latest_version',
+            args.latest_version
+        ])
+
     RunCmd(cmd, args.timeout, result_interface).Run()
 
-    time.sleep(3)
+    time.sleep(10)
     try:
         score, result = VULPIXAnalyzer.analyze(args.app_id)
     except:

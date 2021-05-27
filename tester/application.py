@@ -10,7 +10,7 @@ import time
 import re
 import logging
 from progressbar import progressbar
-from .exceptions import AppNotFoundError, DeviceOfflineError, GamesNotSupportedError, NotSupportedError, PaidAppError
+from .exceptions import AlreadyTestedError, AppNotFoundError, DeviceOfflineError, GamesNotSupportedError, NotSupportedError, PaidAppError
 from .playstore_helper import get_cat_slug
 
 
@@ -170,7 +170,7 @@ class DynamicTestingApplication:
 
         return app_name, dev_name, app_cat
 
-    def test(self, apk_path, action_count=10, install=True, debug=False, activity=None, install_type="apk", dump_apk=True, dump_manifest=True, proxy=True, reset_state=True):
+    def test(self, apk_path, action_count=10, install=True, debug=False, activity=None, install_type="apk", dump_apk=True, dump_manifest=True, proxy=True, reset_state=True, latest_version=None):
         if not self.device_controller.is_online():
             raise DeviceOfflineError
 
@@ -197,6 +197,9 @@ class DynamicTestingApplication:
                         manifest = self.device_controller.dump_apk_manifest(apk_path)
                         manifest["developer"] = dev_name
                         manifest["category"] = app_cat
+
+                        if latest_version and latest_version == manifest["versionName"]:
+                            raise AlreadyTestedError
 
                         if not activity:
                             activity = manifest["launchableActivity"]
@@ -252,6 +255,7 @@ class DynamicTestingApplication:
                 time.sleep(1)
 
         '''Cleaning up'''
+        del proxy_controller
         logging.info('Cleaning up')
         if proxy:
             self.device_controller.set_wifi_proxy()  # Set back to default

@@ -37,6 +37,9 @@ parser.add_argument('--appium_port', metavar='appium_port',
 
 parser.add_argument('--si', metavar="skip_install", type=bool,
                     help="Skip the installation process", default=False)
+parser.add_argument('--latest_version', metavar="latest_version", type=str,
+                    help="Latest version of the application. The script will terminate \
+                    if the downloaded app has the same version as latest_version", default=None)
 
 
 if __name__ == '__main__':
@@ -93,22 +96,25 @@ if __name__ == '__main__':
 
         app.foreach(on_perform)
 
-        installed_packages_before_test = set(app.device_controller.get_all_installed_packages())
+        installed_packages_before_test = set(
+            app.device_controller.get_all_installed_packages())
 
         app.test(
             args.app_id,
             install_type='playstore',
             reset_state=True,
+            latest_version=args.latest_version
         )
     except Exception as exception:
         logging.error(
             'Unexpected error while performing dynamic test', exception)
 
         '''Delete all dangling apps'''
-        installed_packages_after_test = set(app.device_controller.get_all_installed_packages())
+        installed_packages_after_test = set(
+            app.device_controller.get_all_installed_packages())
         packages_to_delete = installed_packages_after_test - installed_packages_before_test
         for orphan_app in packages_to_delete:
             logging.info(f'Deleting orphan app: {orphan_app}')
             app.device_controller.uninstall(orphan_app)
-        
+
         sys.exit(exception.exit_code)
