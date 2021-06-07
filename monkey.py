@@ -77,6 +77,10 @@ if __name__ == '__main__':
             install_type='playstore',
             reset_state=True,
         )
+
+        # Read log_appium and extract appWaitActivity
+
+        # Rerun app.test
     except Exception as exception:
         logging.error('Unexpected error while performing dynamic test', exception)
         sys.exit(exception.exit_code)
