@@ -223,6 +223,7 @@ class FillTextFieldsRule(Rule):
 class LoopThroughMenuRule(Rule):
     def __init__(self, random_rate=0.25):
         self.has_menu = False
+        self.random_rate = random_rate
 
     def description(self):
         return "Loop through menu items if exist"
