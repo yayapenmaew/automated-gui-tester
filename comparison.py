@@ -10,11 +10,13 @@ import os
 import sys
 import random
 
+
 class TesterConfig:
     DEVICE_NAME = "K6T6R17909001485"
     PROXY_HOST = "192.168.1.249"
     ANDROID_VERSION = "7.0"
     N_ACTIONS = 50
+
 
 def run_benchmark(app_id, mode, rules=[], install=False, timeout=None):
     app = DynamicTestingApplication(
@@ -35,8 +37,8 @@ def run_benchmark(app_id, mode, rules=[], install=False, timeout=None):
 
     time_history = [time.time()]
     state_tracking = []
-    
-    if mode == "ga":
+
+    if mode == "ga" or mode == "rule_based":
         def on_perform(app_controller: AppController, step):
             if timeout:
                 if time_history[-1] - time_history[0] > timeout:
@@ -69,10 +71,11 @@ def run_benchmark(app_id, mode, rules=[], install=False, timeout=None):
 
         activity_counts = [0]
         package_counts = [0]
+
         def on_perform(app_controller: AppController, step):
             if step == 0:
                 start_times.append(time.time())
-            
+
             start_time = start_times[0]
             if timeout:
                 if time_history[-1] - time_history[0] > timeout:
@@ -157,7 +160,7 @@ def run_benchmark(app_id, mode, rules=[], install=False, timeout=None):
                             # height = window_size["height"]
                             # width = window_size["width"]
                             temp = random.randrange(4)
-                            #driver.swipe(startX, startY, endX, endY, duration)
+                            # driver.swipe(startX, startY, endX, endY, duration)
                             if temp == 0:
                                 try:
                                     driver.swipe(width/2, height/2,
@@ -220,18 +223,22 @@ def run_benchmark(app_id, mode, rules=[], install=False, timeout=None):
         app_id,
         install_type='playstore',
         install=install,
-        proxy=False,
+        # proxy=False,
         reset_state=False
     )
 
     with open('tracking.txt', 'a') as fp:
-        fp.write(app_id + "\t" + mode + "\t" + ','.join([str(e) for e in state_tracking]) + "\n")
+        fp.write(app_id + "\t" + mode + "\t" +
+                 ','.join([str(e) for e in state_tracking]) + "\n")
 
     return len(states.nodes())
 
+
 def append_score(app_name, mode, score, vulpix_score, running_time, filename="model_comparison.txt"):
     with open(filename, "a") as fp:
-        fp.write(app_name + "\t" + mode + "\t" + str(score) + "\t" + str(vulpix_score) + "\t" + str(running_time) + "\n")
+        fp.write(app_name + "\t" + mode + "\t" + str(score) + "\t" +
+                 str(vulpix_score) + "\t" + str(running_time) + "\n")
+
 
 if __name__ == '__main__':
     app_list = sys.argv[1]
@@ -242,25 +249,28 @@ if __name__ == '__main__':
             if '%' in app_id:
                 continue
             try:
-                rules = initialize_rules(include=[
-                    "ViewPagerRule",
-                    "ImageButtonRule",
-                    "ActionBarRule",
-                    "RandomClickElementRule",
-                    "FillTextFieldsRule",
-                    "BackToAppRule",
-                ])
-                for mode in ["mankey", "ga"]:
+                for mode in ["ga", "rule_based", "mankey"]:
+                    if mode == "ga":
+                        rules = initialize_rules(include=[
+                            "ViewPagerRule",
+                            "ImageButtonRule",
+                            "ActionBarRule",
+                            "RandomClickElementRule",
+                            "FillTextFieldsRule",
+                            "BackToAppRule",
+                        ])
+                    else:
+                        rules = initialize_rules()
                     t_start = time.time()
                     score = run_benchmark(app_id, mode, rules, not installed)
                     t_end = time.time()
 
                     try:
-                        vulpix_score, _ = VULPIXAnalyzer.analyze(app_id)
+                        vulpix_score, vulpix_pi = VULPIXAnalyzer.analyze(app_id)
                     except:
                         vulpix_score = -1
 
-                    append_score(app_id, mode, score, vulpix_score, t_end - t_start)
+                    append_score(app_id, mode, score, vulpix_pi, t_end - t_start)
                     installed = True
                     time.sleep(10)
             except KeyboardInterrupt:

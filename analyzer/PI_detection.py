@@ -63,15 +63,15 @@ PII_TYPE = {
 
 
 Unique_username = "Sylphsgt098VWE"
-Unique_password = "u8zvTBYNnnGn"
-Email = "boomngongseniorproject@gmail.com"
+Unique_password = "rCASqnlYfH"
+Email = "vulpix2.dynamic.tester@gmail.com"
 Unspecified_text = "YaaKcuMEgEsr"
 PhoneNo = "+66825999999"
-firstname = "iBvAdkFi"
-lastname = "eTJexjgnzPGS"
+firstname = "firstnameCxVGzGroWP"
+lastname = "lastnamerrFIpWtbfN"
 Country = "Thailand"
 Province = "Bangkok"
-Day = "29"
+Day = "28"
 Month = "02"
 Year = "1990"
 FULLNAME = firstname + " " + lastname

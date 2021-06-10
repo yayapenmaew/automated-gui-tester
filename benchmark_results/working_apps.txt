@@ -1,0 +1,135 @@
+% com.miga.world
+% idm.internet.download.manager
+% com.karolinaaleksandrova.fastramcleaner
+% com.excelliance.multiaccounts
+% com.siwalusoftware.dogscanner
+% org.plantnet
+% com.lenovo.anyshare.gps
+% com.miga.mytvshows
+% es.monkimun.lingokids
+% com.miga.myvacation
+% com.instructure.candroid
+% com.quizizz_mobile
+% com.miga.mystore
+% kidzooly.fivelittle
+% com.xenonstudio.serversformcpe
+% com.google.android.apps.classroom
+% com.taprix.er.emergency.hospital.surgery.simulator.doctor.games
+% com.forqan.tech.Jobs
+% com.g19mobile.gamebooster
+% com.suvorov.tl_en
+% com.devsense.symbolab
+% com.gamma.scan
+% com.virus.hunter
+% com.yousician.yousician
+% com.expressvpn.vpn
+% com.kitoved.skmine.topsfm
+% com.tu.topwidget
+% com.google.android.apps.translate
+% com.miga.myapartment
+% com.lingbe.app
+% com.excean.parallelspace
+% com.dubox.drive
+% com.deepstash
+% com.junkremoval.pro
+% com.skc.smartkidzclub
+% com.appsinnova.android.battery
+com.soomapps.screenmirroring
+com.appsci.tenwords
+com.noxgroup.app.cleaner
+com.fast.free.unblock.thunder.vpn
+com.easytouch.assistivetouch
+com.tocaboca.hairsalon2.iap
+ru.zdevs.zarchiver
+com.mov.movcy
+do.multiple.cloner
+com.cleanteam.onesecurity
+com.free.fast.hot.vpn
+com.crone.skinsforgirls
+ph.com.globe.globeathome
+kr.co.smartstudy.bodlebookiapfree_us_android_googlemarket
+vpn.fastvpn.freevpn
+itopvpn.free.vpn.proxy
+com.math.photo.scanner.equation.formula.calculator
+com.moodle.moodlemobile
+com.modbarbie.hermosso
+us.nobarriers.elsa
+mazz.renn.injector.liz
+me.jagar.paraphraser
+com.chuchutv.nurseryrhymespro
+com.miga.myschool
+indiemcpedl.furnicraftminecraftaddon
+com.greysprings.kindergarten8
+com.mc.anime.skinsmcpe
+com.getepic.Epic
+app.intra
+com.cleaner.boost.junk.system
+com.htetznaing.zfont2
+com.superbooster.master
+com.smart.consumer.app
+com.vpn.powervpn2
+com.truedevelopersstudio.automatictap.autoclicker
+com.ufo.speakkorean
+com.google.android.apps.adm
+com.funpop.android_bubbletea
+com.appcool.learnkorean
+com.mate.vpn
+com.orangeannoe.englishdictionary
+com.miga.myhospital
+com.nbz.phonekeeper
+com.lingodeer
+com.free.turbo.unlimited.touch.vpn
+com.lto.exam.reviewer
+com.ovelin.guitartuna
+com.utube.videotube.vanced.kit
+com.designkeyboard.keyboard
+com.joytunes.simplypiano
+com.lexa.fakegps
+com.bigfamily.cocomelonsong
+io.mrarm.mctoolbox
+com.miga.myfirestation
+com.playtoddlers.happydaycarestories.free
+com.kimcy929.screenrecorder
+kr.co.smartstudy.singingphone_android_googlemarket
+kidzooly.rhymes
+com.mathpresso.qanda
+com.voice.funnyvoicechanger
+kr.co.smartstudy.babyshark_android_googlemarket
+com.ufo.learnjapanese
+com.music.youngradioplus
+com.avast.android.mobilesecurity
+com.hegodev.matchit
+com.miga.mypets
+com.google.socratic
+com.coloring.dinosaur
+club.ultracleaner.pro
+air.com.eu.inove.sss2
+cn.danatech.xingseus
+com.miga.mytown
+com.duolingo
+co.brainly
+com.app.any.vpn.pro
+com.openlms.openlmsmobile
+com.fusionprojects.edmodo
+com.foofoo.coloring
+com.google.android.apps.jam
+com.pandavpnfree.androidproxy
+com.root.clean.boost.explorer.filemanager
+multi.parallel.dualspace.cloner
+com.codegent.apps.learn.korean
+com.playtoddlers.sweethomestories.free
+com.rarlab.rar
+com.cleanteam.oneboost
+com.appblockgames.freecraftexploration
+com.dyer.secvpn
+com.convergeict.android
+alldictdict.alldict.tlen
+com.eco.fastcharger
+com.lbe.parallel.intl.arm64
+com.rise.automatic.autoclicker.clicker
+com.pkt.versant
+com.tocaboca.tocahairsalon4
+com.google.android.apps.authenticator2
+advanced.scientific.calculator.calc991.plus
+org.coursera.android
+com.aspiringminds.amcat
