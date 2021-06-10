@@ -170,7 +170,6 @@ class DynamicTestingApplication:
 
         return app_name, dev_name, app_cat
 
-    # Add argument to accept desired cap extracted from log
     def test(
         self, 
         apk_path, 
