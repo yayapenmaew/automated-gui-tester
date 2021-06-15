@@ -8,6 +8,7 @@ import os
 from tester.exceptions import DynamicTestError, PaidAppError
 from dotenv import load_dotenv, find_dotenv
 import sys
+import re
 
 
 load_dotenv(find_dotenv())
@@ -77,6 +78,29 @@ if __name__ == '__main__':
             install_type='playstore',
             reset_state=True,
         )
+
+        # Read log_appium and extract appWaitActivity
+        log_pointer = open(os.path.join(pathlib.Path(__file__).parent.absolute(), 'log_appium', args.app_id + '.log'))
+        log = log_pointer.readlines()
+        log_pointer.close()
+
+        pattern = "Found package: '[a-zA-Z0-9_\.]+' and fully qualified activity name : '([a-zA-Z0-9_\.]+)'"
+        activities = set()
+
+        for line in log:
+            activity = re.search(pattern, line)
+            if activity is not None:
+                activities.add(activity.group(1))
+
+        # Rerun app.test
+        while len(activities) > 0:
+            activity = activities.pop()
+            app.test(
+                args.app_id,
+                install_type='playstore',
+                reset_state=True,
+                activity=activity,
+            )
     except Exception as exception:
         logging.error('Unexpected error while performing dynamic test', exception)
         sys.exit(exception.exit_code)

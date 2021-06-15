@@ -170,7 +170,19 @@ class DynamicTestingApplication:
 
         return app_name, dev_name, app_cat
 
-    def test(self, apk_path, action_count=10, install=True, debug=False, activity=None, install_type="apk", dump_apk=True, dump_manifest=True, proxy=True, reset_state=True, latest_version=None):
+    def test(
+        self, 
+        apk_path, 
+        action_count=10, 
+        install=True, 
+        debug=False, 
+        activity=None, 
+        install_type="apk", 
+        dump_apk=True, 
+        dump_manifest=True, 
+        proxy=True, 
+        reset_state=True, 
+        latest_version=None):
         if not self.device_controller.is_online():
             raise DeviceOfflineError
 
