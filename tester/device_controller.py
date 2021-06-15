@@ -191,6 +191,6 @@ class DeviceController:
         return result
 
     def get_all_installed_packages(self):
-        packages = subprocess.check_output("adb shell 'pm list packages -f' | sed -e 's/.*=//' | sort", shell=True).decode()
+        packages = subprocess.check_output(f"adb -s {self.device_name} shell 'pm list packages -f' | sed -e 's/.*=//' | sort", shell=True).decode()
         return [p.strip() for p in packages.split('\n')]
 

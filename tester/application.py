@@ -255,7 +255,8 @@ class DynamicTestingApplication:
                 time.sleep(1)
 
         '''Cleaning up'''
-        del proxy_controller
+        if proxy:
+            del proxy_controller
         logging.info('Cleaning up')
         if proxy:
             self.device_controller.set_wifi_proxy()  # Set back to default
