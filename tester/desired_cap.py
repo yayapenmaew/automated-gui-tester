@@ -15,7 +15,6 @@ class AndroidDesiredCapabilities:
             "proxyPort": proxy_port,
             "systemPort": system_port,
             "appiumPort": appium_port,
-            'autoGrantPermissions': True,
             'fullReset': False,
             'unicodeKeyboard': True,
             'resetKeyboard': True,
