@@ -31,6 +31,12 @@ parser.add_argument('--system_port', metavar='system_port',
 parser.add_argument('--appium_port', metavar='appium_port',
                     type=int, help='Appium port', default=4723)
 
+parser.add_argument('--si', metavar="skip_install", type=bool,
+                    help="Skip the installation process", default=False)
+parser.add_argument('--latest_version', metavar="latest_version", type=str,
+                    help="Latest version of the application. The script will terminate \
+                    if the downloaded app has the same version as latest_version", default=None)
+
 
 if __name__ == '__main__':
     args = parser.parse_args()
@@ -63,7 +69,7 @@ if __name__ == '__main__':
             java_home=os.environ.get("JAVA_HOME")
         )
 
-        action_count = 300
+        action_count = 200
         app.set_action_count(action_count)
 
         window_size = ""
@@ -98,16 +104,12 @@ if __name__ == '__main__':
 
                 if (activity_count >= 50):
                     activity_count = 0
-                    if time.time() - start_time >= 200:
-                        return False
 
                     try:
                         driver.launch_app()
                     except:
                         pass
                 else:
-                    if time.time() - start_time >= 200:
-                        return False
                     try:
                         prev_activity = driver.current_activity
                         Clickable_Elements = driver.find_elements_by_android_uiautomator(
@@ -116,15 +118,11 @@ if __name__ == '__main__':
                         for element in Clickable_Elements:
                             if element.get_attribute("class") == "android.widget.EditText" and element.get_attribute("focusable") == "true":
                                 Textinput_Elements.append(element)
-                            if time.time() - start_time >= 200:
-                                return False
 
                         Clickable_Elements = list(
                             set(Clickable_Elements) - set(Textinput_Elements))
                         # iMonkey
                         # random action  1 - 100
-                        if time.time() - start_time >= 200:
-                            return False
                         if (len(Clickable_Elements) == 0):
                             random_action = random.randrange(81, 101)
                         elif (len(Textinput_Elements) == 0):
@@ -198,19 +196,28 @@ if __name__ == '__main__':
                     if(curr_activity == prev_activity):
                         activity_count += 1
 
-            if time.time() - start_time >= 200:
-                return False
 
         app.foreach(on_perform)
+
+        installed_packages_before_test = set(
+            app.device_controller.get_all_installed_packages())
 
         app.test(
             args.app_id,
             install_type='playstore',
             reset_state=False,
+            latest_version=args.latest_version
         )
-    except PaidAppError as exception:
-        logging.error('Paid app is not supported')
-        sys.exit(exception.exit_code)
     except Exception as exception:
-        logging.error('Unexpected error while performing dynamic test')
+        logging.error(
+            'Unexpected error while performing dynamic test', exception)
+
+        '''Delete all dangling apps'''
+        installed_packages_after_test = set(
+            app.device_controller.get_all_installed_packages())
+        packages_to_delete = installed_packages_after_test - installed_packages_before_test
+        for orphan_app in packages_to_delete:
+            logging.info(f'Deleting orphan app: {orphan_app}')
+            app.device_controller.uninstall(orphan_app)
+
         sys.exit(exception.exit_code)
