@@ -150,12 +150,20 @@ class DynamicTestingApplication:
             Widget.BUTTON, {"text": "Install"})
         if len(install_button) > 0:
             install_button[0].click()
+
+            '''Grant permissions'''
+            app_controller.delay(5)
+            perm_accept_button = app_controller.highlevel_query.find_by_classname(
+                    Widget.BUTTON, {"text": "ACCEPT"})
+            if len(perm_accept_button) > 0:
+                perm_accept_button[0].click()
+
             '''Wait until the app is installed'''
             installed = False
             while not installed:
-                app_controller.delay(6)
                 installed = len(app_controller.highlevel_query.find_by_classname(
                     Widget.BUTTON, {"text": "Uninstall"})) > 0
+                app_controller.delay(6)
             logging.info('Installed successfully')
         else:
             paid_button = app_controller.highlevel_query.find_by_classname(Widget.BUTTON, {"text": re.compile("\d+\.\d+")})
@@ -264,7 +272,7 @@ class DynamicTestingApplication:
         else:
             for i in progressbar(range(action_count)):
                 self.on_perform(app_controller, i)
-                time.sleep(1)
+                # time.sleep(1)
 
         '''Cleaning up'''
         if proxy:
