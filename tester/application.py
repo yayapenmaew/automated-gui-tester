@@ -12,7 +12,7 @@ import logging
 from progressbar import progressbar
 from .exceptions import AlreadyTestedError, AppNotFoundError, DeviceOfflineError, GamesNotSupportedError, NotSupportedError, PaidAppError
 from .playstore_helper import get_cat_slug
-
+from google_play_scraper import app as google_play_scraper_app
 
 class DynamicTestingApplication:
     def __init__(
@@ -81,6 +81,9 @@ class DynamicTestingApplication:
             self.desired_cap, PLAYSTORE_PACKAGE_NAME, PLAYSTORE_ACTIVITY)
         app_controller.delay(3)
 
+        APP_NAME = google_play_scraper_app(package_name,lang='en', country='us')['title']
+        logging.info(f"Installing APP_NAME {APP_NAME} via Playstore")
+
         '''Click on search bar'''
         search_box = []
         while not search_box:
@@ -93,7 +96,8 @@ class DynamicTestingApplication:
         '''Enter app identifier into the search bar'''
         search_bar = app_controller.highlevel_query.find_by_classname(
             Widget.EDIT_TEXT, {"focusable": True})[0]
-        search_bar.send_keys(package_name)
+        #search_bar.send_keys(package_name)
+        search_bar.send_keys(APP_NAME)
 
         '''Click enter to search'''
         ENTER_KEYCODE = 66
@@ -105,7 +109,7 @@ class DynamicTestingApplication:
         while not results:
             results = app_controller.highlevel_query.find_by_classname(
                 Widget.LINEAR_LAYOUT, {"clickable": True})
-            
+
             no_result = len(app_controller.highlevel_query.find_by_classname(
                 Widget.TEXT_VIEW, {"text": re.compile("No results for")})) > 0
             if no_result:
@@ -114,7 +118,8 @@ class DynamicTestingApplication:
             app_controller.delay(3)
 
         '''Skip advertisement and suggestion results'''
-        app_list = app_controller.highlevel_query.find_by_classname(Widget.VIEW)
+        app_list = app_controller.highlevel_query.find_by_classname(
+            Widget.VIEW)
         result_offset = 0
         for app in app_list:
             app_detail = app.get_attribute('contentDescription')
@@ -123,7 +128,7 @@ class DynamicTestingApplication:
             if "App: " in app_detail and "\nAd\n" not in app_detail:
                 break
             result_offset += 1
-        
+
         result_offset += len(app_controller.highlevel_query.find_by_classname(
             Widget.TEXT_VIEW, {"text": "Did you mean:"}))
 
@@ -144,6 +149,12 @@ class DynamicTestingApplication:
         logging.info(f"Tags: {', '.join(app_tags)}")
         logging.info(f"Category: {app_cat}")
 
+        '''Click Got it button'''
+        gotit_button = app_controller.highlevel_query.find_by_classname(
+            Widget.BUTTON, {"text": "Got it"})
+        if len(gotit_button) > 0:
+            gotit_button[0].click()
+
         '''Click install button'''
         logging.info('Installing the application')
         install_button = app_controller.highlevel_query.find_by_classname(
@@ -154,7 +165,7 @@ class DynamicTestingApplication:
             '''Grant permissions'''
             app_controller.delay(5)
             perm_accept_button = app_controller.highlevel_query.find_by_classname(
-                    Widget.BUTTON, {"text": "ACCEPT"})
+                Widget.BUTTON, {"text": "ACCEPT"})
             if len(perm_accept_button) > 0:
                 perm_accept_button[0].click()
 
@@ -162,11 +173,13 @@ class DynamicTestingApplication:
             installed = False
             while not installed:
                 installed = len(app_controller.highlevel_query.find_by_classname(
-                    Widget.BUTTON, {"text": "Uninstall"})) > 0
+                    Widget.BUTTON, {"text": "Uninstall"})) > 0 or len(app_controller.highlevel_query.find_by_classname(
+                        Widget.BUTTON, {"text": "Open"})) > 0
                 app_controller.delay(6)
             logging.info('Installed successfully')
         else:
-            paid_button = app_controller.highlevel_query.find_by_classname(Widget.BUTTON, {"text": re.compile("\d+\.\d+")})
+            paid_button = app_controller.highlevel_query.find_by_classname(
+                Widget.BUTTON, {"text": re.compile("\d+\.\d+")})
             if len(paid_button) > 0:
                 raise PaidAppError
             logging.warn(
@@ -179,18 +192,18 @@ class DynamicTestingApplication:
         return app_name, dev_name, app_cat
 
     def test(
-        self, 
-        apk_path, 
-        action_count=10, 
-        install=True, 
-        debug=False, 
-        activity=None, 
-        install_type="apk", 
-        dump_apk=True, 
-        dump_manifest=True, 
-        proxy=True, 
-        reset_state=True, 
-        latest_version=None):
+            self,
+            apk_path,
+            action_count=10,
+            install=True,
+            debug=False,
+            activity=None,
+            install_type="apk",
+            dump_apk=True,
+            dump_manifest=True,
+            proxy=True,
+            reset_state=True,
+            latest_version=None):
         if not self.device_controller.is_online():
             raise DeviceOfflineError
 
@@ -201,7 +214,8 @@ class DynamicTestingApplication:
             if install_type == "apk":
                 self.device_controller.install_apk(apk_path)
             elif install_type == "playstore":
-                app_name, dev_name, app_cat = self.install_via_playstore(apk_path)
+                app_name, dev_name, app_cat = self.install_via_playstore(
+                    apk_path)
 
                 if app_cat == 'games':
                     raise GamesNotSupportedError
@@ -209,12 +223,14 @@ class DynamicTestingApplication:
                 '''Dump apk'''
                 if dump_apk:
                     try:
-                        self.device_controller.dump_apk(apk_path, f"apk/{apk_path}.apk")
+                        self.device_controller.dump_apk(
+                            apk_path, f"apk/{apk_path}.apk")
                     except:
                         raise NotSupportedError
 
                     if dump_manifest:
-                        manifest = self.device_controller.dump_apk_manifest(apk_path)
+                        manifest = self.device_controller.dump_apk_manifest(
+                            apk_path)
                         manifest["developer"] = dev_name
                         manifest["category"] = app_cat
 
@@ -230,7 +246,6 @@ class DynamicTestingApplication:
             else:
                 raise Exception('Invalid installation type')
 
-
         '''Include app or appPackage into desired cap'''
         extended_desired_cap = self.desired_cap
         if '.apk' in apk_path:
@@ -243,19 +258,19 @@ class DynamicTestingApplication:
             if not activity:
                 activity = self.device_controller.get_default_activity_of(
                     package_name)
-                
+
                 if not activity:
                     raise Exception(
                         "Could not find the default activity of the application.")
-                        
-            logging.info(
-                    f"The application will be started with the activity {activity}")
 
+            logging.info(
+                f"The application will be started with the activity {activity}")
 
         '''Initialize a proxy server'''
         if proxy:
             proxy_port = self.desired_cap['proxyPort']
-            logging.info(f"Setting wifi proxy to {self.proxy_host}:{proxy_port}")
+            logging.info(
+                f"Setting wifi proxy to {self.proxy_host}:{proxy_port}")
             self.device_controller.set_wifi_proxy(self.proxy_host, proxy_port)
             proxy_controller = ProxyController(proxy_port, package_name)
 
@@ -287,5 +302,3 @@ class DynamicTestingApplication:
             # self.device_controller.reboot()
 
         logging.info('The application has been tested sucessfully')
-
-
