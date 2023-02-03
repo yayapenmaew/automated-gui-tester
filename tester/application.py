@@ -172,11 +172,16 @@ class DynamicTestingApplication:
             '''Wait until the app is installed'''
             installed = False
             while not installed:
-                installed = len(app_controller.highlevel_query.find_by_classname(
+                installed = (len(app_controller.highlevel_query.find_by_classname(
                     Widget.BUTTON, {"text": "Uninstall"})) > 0 or len(app_controller.highlevel_query.find_by_classname(
-                        Widget.BUTTON, {"text": "Open"})) > 0
+                        Widget.BUTTON, {"text": "Open"})) > 0) and not (len(app_controller.highlevel_query.find_by_classname(
+                        Widget.BUTTON, {"text": "Open"})) > 0 and len(app_controller.highlevel_query.find_by_classname(
+                        Widget.BUTTON, {"text": "Cancel"})) > 0)
                 app_controller.delay(6)
             logging.info('Installed successfully')
+            """ logging.info('Run Objection on the target application')
+            os.system(f'objection -g {package_name} explore -q')
+            os.system(f'android sslpinning disable') """
         else:
             paid_button = app_controller.highlevel_query.find_by_classname(
                 Widget.BUTTON, {"text": re.compile("\d+\.\d+")})
@@ -194,7 +199,7 @@ class DynamicTestingApplication:
     def test(
             self,
             apk_path,
-            action_count=10,
+            action_count=20,
             install=True,
             debug=False,
             activity=None,
@@ -278,9 +283,12 @@ class DynamicTestingApplication:
             extended_desired_cap, package_name, activity)
 
         self.on_before(app_controller)
-
+        logging.info(
+                f"here")
         if hasattr(self, 'action_count'):
             action_count = self.action_count
+            logging.info(
+                f"Action count: {action_count}")
 
         if debug:
             self.__debug(app_controller)

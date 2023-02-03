@@ -35,8 +35,8 @@ To perform a dynamic testing, run
 
 ```
 python3 main.py <device_name> <app_id> <proxy_host>
-python3 main.py emulator-5554 com.americastestkitchen.groceryapp 10.18.76.108
-python3 main.py emulator-5554 com.facebook.katana 10.18.76.108
+python3 main.py emulator-5554 com.americastestkitchen.groceryapp 192.168.10.206 --appium_port 8201
+python3 main.py emulator-5554 com.facebook.katana 192.168.10.206 --appium_port 8201
 python3 main.py Pixel_3a_API_33_arm64-v8a com.cbs.app 192.168.1.249
 python3 main.py 10.0.2.15 com.cbs.app 127.0.0.1
 python3 main.py sdk_gphone64_arm64 com.cbs.app 192.168.1.249

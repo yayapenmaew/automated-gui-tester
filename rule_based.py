@@ -72,7 +72,7 @@ if __name__ == '__main__':
             java_home=os.environ.get("JAVA_HOME")
         )
 
-        action_count = 50
+        action_count = 300 #50
         app.set_action_count(action_count)
 
         rules = initialize_rules(include=[
