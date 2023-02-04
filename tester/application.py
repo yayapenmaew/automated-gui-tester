@@ -157,6 +157,16 @@ class DynamicTestingApplication:
             Widget.BUTTON, {"text": "Got it"})
         if len(gotit_button) > 0:
             gotit_button[0].click()
+            app_info = app_controller.highlevel_query.find_by_classname(
+            Widget.TEXT_VIEW)[:2]
+            app_name, dev_name = list(
+                map(lambda elem: elem.get_attribute('text'), app_info))
+            logging.info(f"2 here {app_name} ({dev_name})")
+            if app_name != 'How ratings are calculated' and app_name != APP_NAME:
+                err = 'cannot find the application'
+                logging.info(f"{app_name} is not {APP_NAME}")
+                storeToTestFailDB(package_name, err)
+                raise AppNotFoundError
 
 
         '''Click install button'''
@@ -164,13 +174,12 @@ class DynamicTestingApplication:
         install_button = app_controller.highlevel_query.find_by_classname(
             Widget.BUTTON, {"text": "Install"})
         if len(install_button) > 0:
-            # if the result app name and the intended app name is not the same, raise error and stored appId in db
-            if app_name != APP_NAME:
+            install_button[0].click()
+            if app_name != 'How ratings are calculated' and app_name != APP_NAME:
                 err = 'cannot find the application'
                 logging.info(f"{app_name} is not {APP_NAME}")
                 storeToTestFailDB(package_name, err)
                 raise AppNotFoundError
-            else: install_button[0].click()
 
             '''Grant permissions'''
             app_controller.delay(5)
@@ -204,6 +213,7 @@ class DynamicTestingApplication:
         del app_controller
         time.sleep(8)
 
+        logging.info(f"1 here {app_name} ({dev_name})")
         return app_name, dev_name, app_cat
 
     def test(

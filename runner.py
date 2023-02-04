@@ -20,8 +20,8 @@ if __name__ == "__main__":
     deviceName = args.device_name
     ex_start = args.ex_start
     additionalArg = args.additional_arg
-    num_run = 2 #number of app to test
-    # ------ python3 runner.py emulator-5554 192.168.1.145 com.ourpact.androidparent '--appium_port 8201'
+    num_run = 5 #number of app to test
+    # ------ python3 runner.py emulator-5554 192.168.1.145 com.americastestkitchen.groceryapp '--appium_port 8201'
     tableName = 'new-application-info'
     dynamodb = boto3.resource('dynamodb')
     table = dynamodb.Table(tableName)
