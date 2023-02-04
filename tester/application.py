@@ -145,7 +145,7 @@ class DynamicTestingApplication:
             map(lambda elem: elem.get_attribute('text'), app_info))
         logging.info(f"{app_name} ({dev_name})")
         # if the result app name and the intended app name is not the same, raise error and stored appId in db
-        if app_name is not APP_NAME:
+        if app_name != APP_NAME:
             err = 'cannot find the application'
             logging.info(f"{app_name} is not {APP_NAME}")
             storeToTestFailDB(package_name, err)
@@ -292,8 +292,6 @@ class DynamicTestingApplication:
             extended_desired_cap, package_name, activity)
 
         self.on_before(app_controller)
-        logging.info(
-                f"here")
         if hasattr(self, 'action_count'):
             action_count = self.action_count
             logging.info(

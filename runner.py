@@ -1,6 +1,7 @@
 import os
 import argparse
 import boto3
+import logging
 
 parser = argparse.ArgumentParser()
 parser.add_argument('device_name', metavar='device_name',
@@ -21,7 +22,6 @@ if __name__ == "__main__":
     additionalArg = args.additional_arg
     num_run = 2 #number of app to test
     # ------ python3 runner.py emulator-5554 192.168.1.145 dto.ee.dmv.genius '--appium_port 8201'
-    dynamo_client = boto3.client("dynamodb")
     tableName = 'new-application-info'
     dynamodb = boto3.resource('dynamodb')
     table = dynamodb.Table(tableName)
@@ -30,7 +30,7 @@ if __name__ == "__main__":
                 Limit=num_run,
                 ExclusiveStartKey={'appId': ex_start}
             )
-    #print(response['LastEvaluatedKey']['appId'])
+    print('To be next ExclusiveStartKey',response['LastEvaluatedKey']['appId'])
     print('Count',response['Count'])
     failUrls = failTable.scan(
         ProjectionExpression='appId'
@@ -38,8 +38,11 @@ if __name__ == "__main__":
     failUrlsDict = {}
     for failItems in failUrls:
         failUrlsDict[failItems['appId']] = 1
+    count = 1
     for item in response['Items']:
         appId = item['appId']
+        logging.info("App",{count}, "Start from", {ex_start},":", {appId})
         if appId not in failUrlsDict:
             #print(f'python3 main.py {deviceName} {appId} {proxyHost} {additionalArg}')
             os.system(f'python3 main.py {deviceName} {appId} {proxyHost} {additionalArg}')
+    print('To be next ExclusiveStartKey',response['LastEvaluatedKey']['appId'])

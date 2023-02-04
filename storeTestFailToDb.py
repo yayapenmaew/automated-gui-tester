@@ -10,5 +10,3 @@ def storeToTestFailDB(appId, err):
         'err':err
     }
 )
-
-storeToTestFailDB('test','test')
