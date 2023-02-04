@@ -128,7 +128,10 @@ class DynamicTestingApplication:
             if not app_detail:
                 continue
             if "App: " in app_detail and "\nAd\n" not in app_detail:
-                break
+                curr_app_name = app_detail.split("\n")[0].replace("App: ","")
+                isTargetApp = curr_app_name == APP_NAME
+                if isTargetApp:
+                    break
             result_offset += 1
 
         result_offset += len(app_controller.highlevel_query.find_by_classname(

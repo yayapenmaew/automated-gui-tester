@@ -13,6 +13,7 @@ class ProxyController:
         self.package_name = package_name
         self.mitm_path = mitm_path
         self.log_file = open(f"./log_mitm/{self.package_name}.log", "w")
+        os.system("pkill -f 'mitmdump -p '")
         self.__start_mitmproxy()
         logging.info(f"Initializing mitmproxy at port {self.proxy_port}")
 
