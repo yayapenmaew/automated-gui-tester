@@ -86,6 +86,13 @@ class DynamicTestingApplication:
         APP_NAME = google_play_scraper_app(package_name,lang='en', country='us')['title']
         logging.info(f"Installing APP_NAME {APP_NAME} via Playstore")
 
+        '''Handle Server Error'''
+        tryagain_button = app_controller.highlevel_query.find_by_classname(
+            Widget.BUTTON, {"text": "Try again"})
+        if(len(tryagain_button)>0):
+            tryagain_button[0].click()
+
+
         '''Click on search bar'''
         search_box = []
         while not search_box:
