@@ -158,19 +158,19 @@ class DynamicTestingApplication:
         if len(gotit_button) > 0:
             gotit_button[0].click()
 
-        # if the result app name and the intended app name is not the same, raise error and stored appId in db
-        if app_name != APP_NAME:
-            err = 'cannot find the application'
-            logging.info(f"{app_name} is not {APP_NAME}")
-            storeToTestFailDB(package_name, err)
-            raise AppNotFoundError
 
         '''Click install button'''
         logging.info('Installing the application')
         install_button = app_controller.highlevel_query.find_by_classname(
             Widget.BUTTON, {"text": "Install"})
         if len(install_button) > 0:
-            install_button[0].click()
+            # if the result app name and the intended app name is not the same, raise error and stored appId in db
+            if app_name != APP_NAME:
+                err = 'cannot find the application'
+                logging.info(f"{app_name} is not {APP_NAME}")
+                storeToTestFailDB(package_name, err)
+                raise AppNotFoundError
+            else: install_button[0].click()
 
             '''Grant permissions'''
             app_controller.delay(5)
