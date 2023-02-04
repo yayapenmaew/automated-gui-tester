@@ -19,19 +19,27 @@ if __name__ == "__main__":
     deviceName = args.device_name
     ex_start = args.ex_start
     additionalArg = args.additional_arg
-    num_run = 250 #number of app to test
-    # ------ python3 runner.py emulator-5554 192.168.10.167 com.mercariapp.mercari '--appium_port 8201'
+    num_run = 2 #number of app to test
+    # ------ python3 runner.py emulator-5554 192.168.1.145 dto.ee.dmv.genius '--appium_port 8201'
     dynamo_client = boto3.client("dynamodb")
     tableName = 'new-application-info'
     dynamodb = boto3.resource('dynamodb')
     table = dynamodb.Table(tableName)
+    failTable = dynamodb.Table('new-fail-urls')
     response =  table.scan(
                 Limit=num_run,
                 ExclusiveStartKey={'appId': ex_start}
             )
     #print(response['LastEvaluatedKey']['appId'])
     print('Count',response['Count'])
+    failUrls = failTable.scan(
+        ProjectionExpression='appId'
+    )['Items']
+    failUrlsDict = {}
+    for failItems in failUrls:
+        failUrlsDict[failItems['appId']] = 1
     for item in response['Items']:
         appId = item['appId']
-        #print(f'python3 main.py {deviceName} {appId} {proxyHost} {additionalArg}')
-        os.system(f'python3 main.py {deviceName} {appId} {proxyHost} {additionalArg}')
+        if appId not in failUrlsDict:
+            #print(f'python3 main.py {deviceName} {appId} {proxyHost} {additionalArg}')
+            os.system(f'python3 main.py {deviceName} {appId} {proxyHost} {additionalArg}')
