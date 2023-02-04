@@ -144,12 +144,6 @@ class DynamicTestingApplication:
         app_name, dev_name = list(
             map(lambda elem: elem.get_attribute('text'), app_info))
         logging.info(f"{app_name} ({dev_name})")
-        # if the result app name and the intended app name is not the same, raise error and stored appId in db
-        if app_name != APP_NAME:
-            err = 'cannot find the application'
-            logging.info(f"{app_name} is not {APP_NAME}")
-            storeToTestFailDB(package_name, err)
-            raise AppNotFoundError
 
         app_tags = app_controller.highlevel_query.find_by_classname(
             Widget.BUTTON)
@@ -163,6 +157,13 @@ class DynamicTestingApplication:
             Widget.BUTTON, {"text": "Got it"})
         if len(gotit_button) > 0:
             gotit_button[0].click()
+
+        # if the result app name and the intended app name is not the same, raise error and stored appId in db
+        if app_name != APP_NAME:
+            err = 'cannot find the application'
+            logging.info(f"{app_name} is not {APP_NAME}")
+            storeToTestFailDB(package_name, err)
+            raise AppNotFoundError
 
         '''Click install button'''
         logging.info('Installing the application')
