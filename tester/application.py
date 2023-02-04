@@ -1,5 +1,7 @@
 import json
 import os
+
+from storeTestFailToDb import storeToTestFailDB
 from .desired_cap import AndroidDesiredCapabilities
 from .device_controller import DeviceController
 from .app_controller import AppController
@@ -142,6 +144,13 @@ class DynamicTestingApplication:
         app_name, dev_name = list(
             map(lambda elem: elem.get_attribute('text'), app_info))
         logging.info(f"{app_name} ({dev_name})")
+        # if the result app name and the intended app name is not the same, raise error and stored appId in db
+        if app_name is not APP_NAME:
+            err = 'cannot find the application'
+            logging.info(f"{app_name} is not {APP_NAME}")
+            storeToTestFailDB(package_name, err)
+            raise AppNotFoundError
+
         app_tags = app_controller.highlevel_query.find_by_classname(
             Widget.BUTTON)
         app_tags = list(map(lambda elem: elem.get_attribute('text'), app_tags))
