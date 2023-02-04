@@ -10,6 +10,8 @@ parser.add_argument('proxy_host', metavar='proxy_host',
                     type=str, help='Proxy host')
 parser.add_argument('ex_start', metavar='ex_start',
                     type=str, help='ex_start')
+parser.add_argument('last_ev', metavar='last_ev',
+                    type=str, help='last_ev')                  
 parser.add_argument('additional_arg', metavar='additional_arg',
                     type=str, help='additional_arg')
 
@@ -18,17 +20,18 @@ if __name__ == "__main__":
     # to set before run
     proxyHost = args.proxy_host
     deviceName = args.device_name
-    ex_start = args.ex_start
+    exStart = args.ex_start
+    lastEv = args.last_ev
     additionalArg = args.additional_arg
     num_run = 5 #number of app to test
-    # ------ python3 runner.py emulator-5554 192.168.10.167 com.miga.mytown '--appium_port 8201'
+    # ------ python3 runner.py emulator-5554 192.168.10.167 com.womanoka.origkids com.livehousex.lively '--appium_port 8201'
     tableName = 'new-application-info'
     dynamodb = boto3.resource('dynamodb')
     table = dynamodb.Table(tableName)
     failTable = dynamodb.Table('new-fail-urls')
     response =  table.scan(
                 Limit=num_run,
-                ExclusiveStartKey={'appId': ex_start}
+                ExclusiveStartKey={'appId': exStart}
             )
     print('To be next ExclusiveStartKey',response['LastEvaluatedKey']['appId'])
     print('Count',response['Count'])
@@ -41,8 +44,11 @@ if __name__ == "__main__":
     count = 1
     for item in response['Items']:
         appId = item['appId']
-        logging.info("App",{count}, "Start from", {ex_start},":", {appId})
+        logging.info("App",{count}, "Start from", {exStart},":", {appId})
         if appId not in failUrlsDict:
             #print(f'python3 main.py {deviceName} {appId} {proxyHost} {additionalArg}')
             os.system(f'python3 main.py {deviceName} {appId} {proxyHost} {additionalArg}')
+        if appId == lastEv:
+            os.system(f'python3 main.py {deviceName} {appId} {proxyHost} {additionalArg}')
+            break
     print('To be next ExclusiveStartKey',response['LastEvaluatedKey']['appId'])
