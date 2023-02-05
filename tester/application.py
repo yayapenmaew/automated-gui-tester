@@ -162,19 +162,6 @@ class DynamicTestingApplication:
         logging.info(f"Tags: {', '.join(app_tags)}")
         logging.info(f"Category: {app_cat}")
 
-        '''Handle complete account setup'''
-        cpas_widget = app_controller.highlevel_query.find_by_classname(
-            Widget.TEXT_VIEW, {"text": "Complete account setup"})
-        if len(cpas_widget>0):
-            cont_button = app_controller.highlevel_query.find_by_classname(
-            Widget.BUTTON, {"text": "Continue"})
-            if(len(cont_button)>0):
-                cont_button[0].click()
-                skip_button = app_controller.highlevel_query.find_by_classname(
-            Widget.BUTTON, {"text": "Skip"})
-                if(len(skip_button)>0):
-                    skip_button[0].click()
-
         '''Click Got it button'''
         gotit_button = app_controller.highlevel_query.find_by_classname(
             Widget.BUTTON, {"text": "Got it"})
@@ -190,6 +177,27 @@ class DynamicTestingApplication:
                 logging.info(f"{app_name} is not {APP_NAME}")
                 storeToTestFailDB(package_name, err)
                 raise AppNotFoundError
+
+        '''Handle complete account setup'''
+        cpas_widget = app_controller.highlevel_query.find_by_classname(
+            Widget.TEXT_VIEW, {"text": "Complete account setup"})
+        if len(cpas_widget)>0:
+            cont_button = app_controller.highlevel_query.find_by_classname(
+            Widget.BUTTON, {"text": "Continue"})
+            if(len(cont_button)>0):
+                cont_button[0].click()
+                skip_button = app_controller.highlevel_query.find_by_classname(
+            Widget.BUTTON, {"text": "Skip"})
+                if(len(skip_button)>0):
+                    skip_button[0].click()
+        """ cont_button = app_controller.highlevel_query.find_by_classname(
+            Widget.BUTTON, {"text": "Continue"})
+        skip_button = app_controller.highlevel_query.find_by_classname(
+            Widget.BUTTON, {"text": "Skip"})
+        if(len(skip_button)>0):
+            skip_button[0].click()
+        else:
+            if len(cont_button)>0: cont_button[0].click() """
 
 
         '''Click install button'''
