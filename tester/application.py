@@ -132,6 +132,7 @@ class DynamicTestingApplication:
         result_offset = 0
         for app in app_list:
             app_detail = app.get_attribute('contentDescription')
+            #logging.info(f'135 {app_detail}')
             if not app_detail:
                 continue
             if "App: " in app_detail and "\nAd\n" not in app_detail:
@@ -143,7 +144,8 @@ class DynamicTestingApplication:
 
         result_offset += len(app_controller.highlevel_query.find_by_classname(
             Widget.TEXT_VIEW, {"text": "Did you mean:"}))
-
+        #logging.info(f'146 {results}')
+        #logging.info(f'147 {result_offset}')
         results[result_offset].click()
         app_controller.delay(3)
 
@@ -224,7 +226,8 @@ class DynamicTestingApplication:
             while not installed:
                 installed = (len(app_controller.highlevel_query.find_by_classname(
                     Widget.BUTTON, {"text": "Uninstall"})) > 0 or len(app_controller.highlevel_query.find_by_classname(
-                        Widget.BUTTON, {"text": "Open"})) > 0) and not (len(app_controller.highlevel_query.find_by_classname(
+                        Widget.BUTTON, {"text": "Open"})) > 0 or len(app_controller.highlevel_query.find_by_classname(
+                        Widget.BUTTON, {"text": "Play"})) > 0) and not (len(app_controller.highlevel_query.find_by_classname(
                         Widget.BUTTON, {"text": "Open"})) > 0 and len(app_controller.highlevel_query.find_by_classname(
                         Widget.BUTTON, {"text": "Cancel"})) > 0)
                 app_controller.delay(6)

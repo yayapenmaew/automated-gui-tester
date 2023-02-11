@@ -1,7 +1,6 @@
 import os
 import argparse
 import boto3
-import logging
 
 parser = argparse.ArgumentParser()
 parser.add_argument('device_name', metavar='device_name',
@@ -24,7 +23,7 @@ if __name__ == "__main__":
     lastEv = args.last_ev
     additionalArg = args.additional_arg
     num_run = 5 #number of app to test
-    # ------ python3 runner.py emulator-5554 192.168.10.167 com.womanoka.origkids com.livehousex.lively '--appium_port 8201'
+    # ------ python3 runner.py emulator-5554 192.168.1.192 info.androidstation.qhdwallpaper com.livehousex.lively '--appium_port 8201'
     tableName = 'new-application-info'
     dynamodb = boto3.resource('dynamodb')
     table = dynamodb.Table(tableName)
@@ -42,13 +41,17 @@ if __name__ == "__main__":
     for failItems in failUrls:
         failUrlsDict[failItems['appId']] = 1
     count = 1
+    appId = ''
     for item in response['Items']:
+        if appId:
+            os.system(f'python3 tester/del.py {deviceName} {appId}') # to delete the previous app in case it is not deleted (time out error)
         appId = item['appId']
-        logging.info("App",{count}, "Start from", {exStart},":", {appId})
+        print("App",{count}, "Start from", {exStart},":", {appId})
         if appId not in failUrlsDict:
             #print(f'python3 main.py {deviceName} {appId} {proxyHost} {additionalArg}')
             os.system(f'python3 main.py {deviceName} {appId} {proxyHost} {additionalArg}')
         if appId == lastEv:
             os.system(f'python3 main.py {deviceName} {appId} {proxyHost} {additionalArg}')
+            print('Finish 250')
             break
     print('To be next ExclusiveStartKey',response['LastEvaluatedKey']['appId'])
