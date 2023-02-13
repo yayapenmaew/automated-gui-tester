@@ -23,7 +23,7 @@ if __name__ == "__main__":
     lastEv = args.last_ev
     additionalArg = args.additional_arg
     num_run = 5 #number of app to test
-    # ------ python3 runner.py emulator-5554 192.168.1.192 info.androidstation.qhdwallpaper com.livehousex.lively '--appium_port 8201'
+    # ------ python3 runner.py emulator-5554 192.168.1.192 logo.maker com.livehousex.lively '--appium_port 8201'
     tableName = 'new-application-info'
     dynamodb = boto3.resource('dynamodb')
     table = dynamodb.Table(tableName)
@@ -54,4 +54,5 @@ if __name__ == "__main__":
             os.system(f'python3 main.py {deviceName} {appId} {proxyHost} {additionalArg}')
             print('Finish 250')
             break
+        count += 1
     print('To be next ExclusiveStartKey',response['LastEvaluatedKey']['appId'])
