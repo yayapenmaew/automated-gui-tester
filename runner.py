@@ -22,8 +22,11 @@ if __name__ == "__main__":
     exStart = args.ex_start
     lastEv = args.last_ev
     additionalArg = args.additional_arg
-    num_run = 5 #number of app to test
-    # ------ python3 runner.py emulator-5554 192.168.1.192 logo.maker com.livehousex.lively '--appium_port 8201'
+    num_run = 10 #number of app to test
+    # bf5d967c
+    # home------ python3 runner.py bf5d967c 192.168.1.192 com.pixelpainter.aViewFromMySeat com.ca.fantuan.customer '--appium_port 8201 --proxy_port 8080 --system_port 8200'
+    # cu - python3 runner.py bf5d967c 10.202.165.119 com.philo.philo.google com.rotation5.smoresup '--appium_port 8201 --proxy_port 8080 --system_port 8200'
+
     tableName = 'new-application-info'
     dynamodb = boto3.resource('dynamodb')
     table = dynamodb.Table(tableName)
@@ -46,12 +49,13 @@ if __name__ == "__main__":
         if appId:
             os.system(f'python3 tester/del.py {deviceName} {appId}') # to delete the previous app in case it is not deleted (time out error)
         appId = item['appId']
-        print("App",{count}, "Start from", {exStart},":", {appId})
         if appId not in failUrlsDict:
+            print("App",{count}, "Start from", {exStart},":", {appId})
             #print(f'python3 main.py {deviceName} {appId} {proxyHost} {additionalArg}')
             os.system(f'python3 main.py {deviceName} {appId} {proxyHost} {additionalArg}')
+        else:
+            print("App",{count}, "Start from", {exStart},":", {appId}, "is in fail-urls")
         if appId == lastEv:
-            os.system(f'python3 main.py {deviceName} {appId} {proxyHost} {additionalArg}')
             print('Finish 250')
             break
         count += 1

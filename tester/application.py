@@ -45,7 +45,7 @@ class DynamicTestingApplication:
 
     def setup_folder(self):
         os.system("mkdir log_appium")
-        os.system("mkdir result")
+        os.system(f"mkdir result-{self.device_udid}")
         os.system("mkdir log_mitm")
         os.system("mkdir log_tester")
         os.system("mkdir apk")
@@ -331,7 +331,7 @@ class DynamicTestingApplication:
             logging.info(
                 f"Setting wifi proxy to {self.proxy_host}:{proxy_port}")
             self.device_controller.set_wifi_proxy(self.proxy_host, proxy_port)
-            proxy_controller = ProxyController(proxy_port, package_name)
+            proxy_controller = ProxyController(proxy_port, package_name, device_name=self.device_udid)
 
         app_controller = AppController(
             extended_desired_cap, package_name, activity)

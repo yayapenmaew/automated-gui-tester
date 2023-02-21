@@ -4,6 +4,7 @@ log_mitm/
 log_appium/
 log_tester/
 result/
+result-*/
 apk/
 app_icons/
 app_info/

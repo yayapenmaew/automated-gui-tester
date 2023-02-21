@@ -289,7 +289,7 @@ class VULPIXAnalyzer():
         return VULPIX_score
 
     def analyze(package_name, PI_file_path="./analyzer/PI.json", har_file=None):
-        logging.info(f"Analyzing traffic of {package_name}")
+        logging.info(f"Analyzing traffic of {package_name} from {har_file} ")
         result_dict = dict()
 
         for PI_element in PII_TYPE:

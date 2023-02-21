@@ -150,7 +150,7 @@ if __name__ == '__main__':
 
     time.sleep(10)
     try:
-        score, result = VULPIXAnalyzer.analyze(args.app_id)
+        score, result = VULPIXAnalyzer.analyze(args.app_id,PI_file_path="PI.json", har_file=f"result-{args.device_name}/{args.app_id}.har")
     except:
         result_interface.send_error(VULPIXAnalyzerError)
         logging.error(VULPIXAnalyzerError)
@@ -160,7 +160,7 @@ if __name__ == '__main__':
         "appium": os.path.join(pathlib.Path(__file__).parent.absolute(), 'log_appium', args.app_id + '.log'),
         "mitm": os.path.join(pathlib.Path(__file__).parent.absolute(), 'log_mitm', args.app_id + '.log'),
         "tester": os.path.join(pathlib.Path(__file__).parent.absolute(), 'log_tester', args.app_id),
-        "har": os.path.join(pathlib.Path(__file__).parent.absolute(), 'result', args.app_id + '.har'),
+        "har": os.path.join(pathlib.Path(__file__).parent.absolute(), 'result-'+args.device_name, args.app_id + '.har'), #change here ja
         "apk": os.path.join(pathlib.Path(__file__).parent.absolute(), 'apk', args.app_id + '.apk'),
         "app_icon": os.path.join(pathlib.Path(__file__).parent.absolute(), 'app_icons', args.app_id + '.png'),
         "app_info": os.path.join(pathlib.Path(__file__).parent.absolute(), 'app_info', args.app_id + '.json'),
