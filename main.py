@@ -19,6 +19,7 @@ class RunCmd(threading.Thread):
         threading.Thread.__init__(self)
         self.cmd = cmd
         self.timeout = timeout
+        
 
     def run(self):
         self.p = sub.Popen(self.cmd)

@@ -296,10 +296,13 @@ class VULPIXAnalyzer():
             result_dict[PI_element] = 0    
 
         Backgroud_Traffic = VULPIXAnalyzer.getBackgroundTraffic()
+        logging.info(f"3 Analyzing traffic of {package_name} from {har_file} ")
         PI_DICT, MacAddr = VULPIXAnalyzer.setupPI(PI_file_path)
 
         if not har_file:
             har_file = f"result/{package_name}.har"
+        
+        logging.info(f"2 Analyzing traffic of {package_name} from {har_file} ")
 
         try:
             file_log = open(har_file, "r", encoding="ISO-8859-1")

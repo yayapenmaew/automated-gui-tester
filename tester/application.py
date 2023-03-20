@@ -115,9 +115,13 @@ class DynamicTestingApplication:
 
         '''Click the first search result which is not an Ads'''
         results = []
+        resname = []
+        start_time = time.time()
+        seconds = 9
         while not results:
             results = app_controller.highlevel_query.find_by_classname(
                 Widget.LINEAR_LAYOUT, {"clickable": True})
+            logging.info(f"results {results}")
 
             no_result = len(app_controller.highlevel_query.find_by_classname(
                 Widget.TEXT_VIEW, {"text": re.compile("No results for")})) > 0
@@ -125,28 +129,49 @@ class DynamicTestingApplication:
                 raise AppNotFoundError
 
             app_controller.delay(3)
+            current_time = time.time()
+            elapsed_time = current_time - start_time
+            if elapsed_time > seconds:
+                break
 
-        '''Skip advertisement and suggestion results'''
-        app_list = app_controller.highlevel_query.find_by_classname(
-            Widget.VIEW)
-        result_offset = 0
-        for app in app_list:
-            app_detail = app.get_attribute('contentDescription')
-            #logging.info(f'135 {app_detail}')
-            if not app_detail:
-                continue
-            if "App: " in app_detail and "\nAd\n" not in app_detail:
-                curr_app_name = app_detail.split("\n")[0].replace("App: ","")
-                isTargetApp = curr_app_name == APP_NAME
-                if isTargetApp:
-                    break
-            result_offset += 1
+        if not results:
+            resname = app_controller.highlevel_query.find_by_classname(
+            Widget.TEXT_VIEW, {"text": APP_NAME })
+            logging.info(f"resname {resname}")
+            print(len(resname))
+            if len(resname)>1:
+                resname[0].click()
+            else:
+                app_list = app_controller.highlevel_query.find_by_classname(
+                Widget.VIEW)
+                if len(app_list)>0:
+                    app_list[0].click()
+        else:
+            '''Skip advertisement and suggestion results'''
+            app_list = app_controller.highlevel_query.find_by_classname(
+                Widget.VIEW)
+            print(app_list)
+            result_offset = 0
+            for app in app_list:
+                app_detail = app.get_attribute('contentDescription')
+                #logging.info(f'135 {app_detail}')
+                if not app_detail:
+                    continue
+                if "App: " in app_detail and "\nAd\n" not in app_detail:
+                    curr_app_name = app_detail.split("\n")[0].replace("App: ","")
+                    isTargetApp = curr_app_name == APP_NAME
+                    if isTargetApp:
+                        break
+                result_offset += 1
 
-        result_offset += len(app_controller.highlevel_query.find_by_classname(
-            Widget.TEXT_VIEW, {"text": "Did you mean:"}))
-        #logging.info(f'146 {results}')
-        #logging.info(f'147 {result_offset}')
-        results[result_offset].click()
+            result_offset += len(app_controller.highlevel_query.find_by_classname(
+                Widget.TEXT_VIEW, {"text": "Did you mean:"}))
+            #logging.info(f'146 {results}')
+            #logging.info(f'147 {result_offset}')
+            logging.info(f'result_offset = {result_offset}')
+            results[result_offset].click()
+
+       
         app_controller.delay(3)
 
         '''Retrieve app information'''
@@ -184,14 +209,17 @@ class DynamicTestingApplication:
         cpas_widget = app_controller.highlevel_query.find_by_classname(
             Widget.TEXT_VIEW, {"text": "Complete account setup"})
         if len(cpas_widget)>0:
+            logging.info('Complete Account Setup 1')
             cont_button = app_controller.highlevel_query.find_by_classname(
             Widget.BUTTON, {"text": "Continue"})
             if(len(cont_button)>0):
                 cont_button[0].click()
+                logging.info('Click continue 1')
                 skip_button = app_controller.highlevel_query.find_by_classname(
             Widget.BUTTON, {"text": "Skip"})
                 if(len(skip_button)>0):
                     skip_button[0].click()
+                    logging.info('Click skip 1')
         """ cont_button = app_controller.highlevel_query.find_by_classname(
             Widget.BUTTON, {"text": "Continue"})
         skip_button = app_controller.highlevel_query.find_by_classname(
@@ -204,6 +232,19 @@ class DynamicTestingApplication:
 
         '''Click install button'''
         logging.info('Installing the application')
+        #handle complete account setup widget
+        continue_button3 = app_controller.highlevel_query.find_by_classname(Widget.BUTTON, {"text": "Continue"})
+        skip_button3 = app_controller.highlevel_query.find_by_classname(Widget.BUTTON, {"text": "Skip"})
+        if len(continue_button3) > 0:
+            if len(skip_button3) > 0:
+                skip_button3[0].click()
+                logging.info('Click skip 3')
+            else:
+                continue_button3[0].click()
+                logging.info('Click continue 3')
+        if len(skip_button3) > 0:
+            skip_button3[0].click()
+            logging.info('Click skip 3.5')
         install_button = app_controller.highlevel_query.find_by_classname(
             Widget.BUTTON, {"text": "Install"})
         if len(install_button) > 0:
@@ -217,19 +258,35 @@ class DynamicTestingApplication:
             '''Grant permissions'''
             app_controller.delay(5)
             perm_accept_button = app_controller.highlevel_query.find_by_classname(
-                Widget.BUTTON, {"text": "ACCEPT"})
+                Widget.BUTTON, {"text": "Accept"})
             if len(perm_accept_button) > 0:
                 perm_accept_button[0].click()
 
             '''Wait until the app is installed'''
             installed = False
             while not installed:
+                #handle complete account setup widget
+                continue_button2 = app_controller.highlevel_query.find_by_classname(Widget.BUTTON, {"text": "Continue"})
+                skip_button2 = app_controller.highlevel_query.find_by_classname(Widget.BUTTON, {"text": "Skip"})
+                install_button = app_controller.highlevel_query.find_by_classname(Widget.BUTTON, {"text": "Install"})
+                if len(install_button) > 0:
+                    install_button[0].click()
+                if len(continue_button2) > 0:
+                    if len(skip_button2) > 0:
+                        skip_button2[0].click()
+                        logging.info('Click skip 2')
+                    else:
+                        continue_button2[0].click()
+                        logging.info('Click continue 2')
+
                 installed = (len(app_controller.highlevel_query.find_by_classname(
                     Widget.BUTTON, {"text": "Uninstall"})) > 0 or len(app_controller.highlevel_query.find_by_classname(
                         Widget.BUTTON, {"text": "Open"})) > 0 or len(app_controller.highlevel_query.find_by_classname(
-                        Widget.BUTTON, {"text": "Play"})) > 0) and not (len(app_controller.highlevel_query.find_by_classname(
+                        Widget.BUTTON, {"text": "Play"})) > 0) and not ((len(app_controller.highlevel_query.find_by_classname(
                         Widget.BUTTON, {"text": "Open"})) > 0 and len(app_controller.highlevel_query.find_by_classname(
-                        Widget.BUTTON, {"text": "Cancel"})) > 0)
+                        Widget.BUTTON, {"text": "Cancel"})) > 0) or ((len(app_controller.highlevel_query.find_by_classname(
+                        Widget.BUTTON, {"text": "Play"})) > 0 and len(app_controller.highlevel_query.find_by_classname(
+                        Widget.BUTTON, {"text": "Cancel"})) > 0)))
                 app_controller.delay(6)
             logging.info('Installed successfully')
             """ logging.info('Run Objection on the target application')

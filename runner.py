@@ -15,6 +15,7 @@ parser.add_argument('additional_arg', metavar='additional_arg',
                     type=str, help='additional_arg')
 
 if __name__ == "__main__":
+    print('start')
     args = parser.parse_args()
     # to set before run
     proxyHost = args.proxy_host
@@ -22,9 +23,12 @@ if __name__ == "__main__":
     exStart = args.ex_start
     lastEv = args.last_ev
     additionalArg = args.additional_arg
-    num_run = 10 #number of app to test
+    num_run = 250 #number of app to test
     # bf5d967c
-    # home------ python3 runner.py bf5d967c 192.168.1.192 com.pixelpainter.aViewFromMySeat com.ca.fantuan.customer '--appium_port 8201 --proxy_port 8080 --system_port 8200'
+    # galaxy------ python3 runner.py bf5d967c 192.168.1.192 com.movemore.walkietalkie.lc com.cv.creator '--appium_port 9201 --proxy_port 9080 --system_port 9200'
+    # xiaomi------ python3 runner.py MBH65LJZDALJLZQG 192.168.1.192 com.yalin.babycare	com.hadev.demonslayer.kimetsunoyaibawallpapers '--appium_port 8201 --proxy_port 8080 --system_port 8200'
+    # tablet------ python3 runner.py 01f8ee7c 192.168.1.192 com.switchvpn.app	com.flavionet.android.camera.lite '--appium_port 7201 --proxy_port 7080 --system_port 7200'
+
     # cu - python3 runner.py bf5d967c 10.202.165.119 com.philo.philo.google com.rotation5.smoresup '--appium_port 8201 --proxy_port 8080 --system_port 8200'
 
     tableName = 'new-application-info'

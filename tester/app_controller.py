@@ -50,6 +50,8 @@ class AppController:
         self.__kill_appium()
 
     def __start_appium(self):
+        cmdK = f"kill -9 $(lsof -ti:{self.appium_port})'"
+        os.system(cmdK)
         cmd = f"appium -p {self.appium_port} >> log_appium/{self.package_name}.log &"
         os.system(cmd)
 
