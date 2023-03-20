@@ -23,9 +23,9 @@ if __name__ == "__main__":
     exStart = args.ex_start
     lastEv = args.last_ev
     additionalArg = args.additional_arg
-    num_run = 250 #number of app to test
+    num_run = 60 #number of app to test
     # bf5d967c
-    # galaxy------ python3 runner.py bf5d967c 192.168.1.192 com.movemore.walkietalkie.lc com.cv.creator '--appium_port 9201 --proxy_port 9080 --system_port 9200'
+    # galaxy------ python3 runner.py bf5d967c 192.168.1.192 com.movemore.walkietalkie.lc com.cv.creator '--appium_port 8201 --proxy_port 8080 --system_port 8200'
     # xiaomi------ python3 runner.py MBH65LJZDALJLZQG 192.168.1.192 com.yalin.babycare	com.hadev.demonslayer.kimetsunoyaibawallpapers '--appium_port 8201 --proxy_port 8080 --system_port 8200'
     # tablet------ python3 runner.py 01f8ee7c 192.168.1.192 com.switchvpn.app	com.flavionet.android.camera.lite '--appium_port 7201 --proxy_port 7080 --system_port 7200'
 

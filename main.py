@@ -10,15 +10,32 @@ from tester.exceptions import EXIT_CODE, TimeOutError, VULPIXAnalyzerError, Exte
 from interfaces.external import ExternalOutputInterface
 from validator.validator import InputValidator
 import logging
+import boto3
+import time
+
+def storeToRunTestFailDB(appId, device, err):
+    tableName = 'run-test-fail-app'
+    dynamodb = boto3.resource('dynamodb')
+    table = dynamodb.Table(tableName)
+    response = table.put_item(
+    Item={
+        'appId':appId,
+        'device':device,
+        'err':err,
+        'timestamp': time.time()
+    }
+)
 
 TIMEOUT_SEC = 15 * 60
 
 
 class RunCmd(threading.Thread):
-    def __init__(self, cmd, timeout, result_interface=None):
+    def __init__(self, cmd, timeout, appId, device, result_interface=None):
         threading.Thread.__init__(self)
         self.cmd = cmd
         self.timeout = timeout
+        self.appId = appId
+        self.device = device
         
 
     def run(self):
@@ -35,6 +52,7 @@ class RunCmd(threading.Thread):
 
             if result_interface:
                 result_interface.send_error(TimeOutError)
+                storeToRunTestFailDB(self.appId)
             raise TimeOutError
         elif self.p.returncode != 0:
             logging.error(f"Tester error with returncode {self.p.returncode}")
@@ -147,7 +165,7 @@ if __name__ == '__main__':
             args.latest_version
         ])
 
-    RunCmd(cmd, args.timeout, result_interface).Run()
+    RunCmd(cmd, args.timeout, args.app_id, args.device_name, result_interface).Run()
 
     time.sleep(10)
     try:
