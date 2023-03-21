@@ -1,3 +1,18 @@
+import boto3
+import time
+def storeToRunTestFailDB(appId, device, err):
+    tableName = 'run-test-fail-app'
+    dynamodb = boto3.resource('dynamodb')
+    table = dynamodb.Table(tableName)
+    response = table.put_item(
+    Item={
+        'appId':appId,
+        'device':device,
+        'err':err,
+        'timestamp': time.time()
+    }
+)
+
 class EXIT_CODE:
     UNKNOWN_ERROR = 1
     DEVICE_OFFLINE = 2
@@ -11,6 +26,7 @@ class EXIT_CODE:
     EXTERNAL_INTERFACE_ERROR = 30
     BAD_INPUT_ERROR = 40
     ALREADY_TESTED_ERROR = 41
+    DOWNLOAD = 43
 
 class UnknownError(Exception):
     def __init__(self, message="Unknown error"):
@@ -25,62 +41,77 @@ class DeviceOfflineError(Exception):
 
 
 class DynamicTestError(Exception):
-    def __init__(self, message="Unexpected error while performing dynamic test"):
+    def __init__(self, appId, device, message="Unexpected error while performing dynamic test"):
         self.exit_code = EXIT_CODE.DYNAMIC_TEST_ERROR
+        storeToRunTestFailDB(appId, device, message)
         super().__init__(message)
 
 
 class TimeOutError(Exception):
-    def __init__(self, message="Tester took too long time to test"):
+    def __init__(self, appId, device, message="Tester took too long time to test"):
         self.exit_code = EXIT_CODE.TIMEOUT_ERROR
+        storeToRunTestFailDB(appId, device, message)
         super().__init__(message)
 
+class DownloadError(Exception):
+    def __init__(self, appId, device, message="Can't download the application"): #press install > partially download laew but fail
+        self.exit_code = EXIT_CODE.DOWNLOAD
+        storeToRunTestFailDB(appId, device, message)
+        super().__init__(message)
 
 class PaidAppError(Exception):
-    def __init__(self, message="Could not test a paid application"):
+    def __init__(self, appId, device, message="Could not test a paid application"):
         self.exit_code = EXIT_CODE.PAID_APP_ERROR
+        storeToRunTestFailDB(appId, device, message)
         super().__init__(message)
 
 
 class NotSupportedError(Exception):
-    def __init__(self, message="Could not test the application"):
+    def __init__(self, appId, device, message="Could not test the application"):
         self.exit_code = EXIT_CODE.NOT_SUPPORTED_ERROR
+        storeToRunTestFailDB(appId, device, message)
         super().__init__(message)
 
 
 class GamesNotSupportedError(Exception):
-    def __init__(self, message="Game applications not supported"):
+    def __init__(self, appId, device, message="Game applications not supported"):
         self.exit_code = EXIT_CODE.GAMES_CAT_ERROR
+        storeToRunTestFailDB(appId, device, message)
         super().__init__(message)
 
 
 class AppNotFoundError(Exception):
-    def __init__(self, message="Application not found"):
+    def __init__(self, appId, device, message="Application not found"):
         self.exit_code = EXIT_CODE.APP_NOT_FOUND_ERROR
+        storeToRunTestFailDB(appId, device, message)
         super().__init__(message)
 
 
 class VULPIXAnalyzerError(Exception):
-    def __init__(self, message="Error while analyzing the traffic"):
+    def __init__(self, appId, device, message="Error while analyzing the traffic"):
         self.exit_code = EXIT_CODE.ANALYZER_ERROR
+        storeToRunTestFailDB(appId, device, message)
         super().__init__(message)
 
 
 class ExternalInterfaceError(Exception):
-    def __init__(self, message="Error while sending result to the external service"):
+    def __init__(self, appId, device, message="Error while sending result to the external service"):
         self.exit_code = EXIT_CODE.EXTERNAL_INTERFACE_ERROR
+        storeToRunTestFailDB(appId, device, message)
         super().__init__(message)
 
 
 class BadInputError(Exception):
-    def __init__(self, message="Bad input error"):
+    def __init__(self, appId, device, message="Bad input error"):
         self.exit_code = EXIT_CODE.BAD_INPUT_ERROR
+        storeToRunTestFailDB(appId, device, message)
         super().__init__(message)
 
 
 class AlreadyTestedError(Exception):
-    def __init__(self, message="This version of the application is already tested"):
+    def __init__(self, appId, device, message="This version of the application is already tested"):
         self.exit_code = EXIT_CODE.ALREADY_TESTED_ERROR
+        storeToRunTestFailDB(appId, device, message)
         super().__init__(message)
 
 
@@ -98,5 +129,6 @@ def resolve_exit_code(exit_code):
         EXIT_CODE.EXTERNAL_INTERFACE_ERROR: ExternalInterfaceError(),
         EXIT_CODE.BAD_INPUT_ERROR: BadInputError(),
         EXIT_CODE.ALREADY_TESTED_ERROR: AlreadyTestedError(),
+        EXIT_CODE.DOWNLOAD: DownloadError()
     }
     return exit_code_mapper[exit_code] if exit_code in exit_code_mapper else None

@@ -301,10 +301,12 @@ class VULPIXAnalyzer():
 
         if not har_file:
             har_file = f"result/{package_name}.har"
+
         
         logging.info(f"2 Analyzing traffic of {package_name} from {har_file} ")
 
         try:
+            har_file = './'+har_file
             file_log = open(har_file, "r", encoding="ISO-8859-1")
             data = file_log.read()
             json_body = json.loads(data)

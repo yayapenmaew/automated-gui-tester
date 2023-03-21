@@ -1,6 +1,5 @@
 import json
 import os
-
 from storeTestFailToDb import storeToTestFailDB
 from .desired_cap import AndroidDesiredCapabilities
 from .device_controller import DeviceController
@@ -12,9 +11,10 @@ import time
 import re
 import logging
 from progressbar import progressbar
-from .exceptions import AlreadyTestedError, AppNotFoundError, DeviceOfflineError, GamesNotSupportedError, NotSupportedError, PaidAppError
+from .exceptions import AlreadyTestedError, AppNotFoundError, DeviceOfflineError, DownloadError, GamesNotSupportedError, NotSupportedError, PaidAppError
 from .playstore_helper import get_cat_slug
 from google_play_scraper import app as google_play_scraper_app
+
 
 class DynamicTestingApplication:
     def __init__(
@@ -202,7 +202,6 @@ class DynamicTestingApplication:
             if app_name != 'How ratings are calculated' and app_name != APP_NAME:
                 err = 'cannot find the application'
                 logging.info(f"{app_name} is not {APP_NAME}")
-                storeToTestFailDB(package_name, err)
                 raise AppNotFoundError
 
         '''Handle complete account setup'''
@@ -252,7 +251,6 @@ class DynamicTestingApplication:
             if app_name != 'How ratings are calculated' and app_name != APP_NAME:
                 err = 'cannot find the application'
                 logging.info(f"{app_name} is not {APP_NAME}")
-                storeToTestFailDB(package_name, err)
                 raise AppNotFoundError
 
             '''Grant permissions'''
@@ -269,6 +267,10 @@ class DynamicTestingApplication:
                 continue_button2 = app_controller.highlevel_query.find_by_classname(Widget.BUTTON, {"text": "Continue"})
                 skip_button2 = app_controller.highlevel_query.find_by_classname(Widget.BUTTON, {"text": "Skip"})
                 install_button = app_controller.highlevel_query.find_by_classname(Widget.BUTTON, {"text": "Install"})
+                cantdownload_button = app_controller.highlevel_query.find_by_classname(Widget.TEXT_VIEW, {"text": "Can't download"})
+                if len(cantdownload_button)>0:
+                    logging.info("Can't download")
+                    raise DownloadError
                 if len(install_button) > 0:
                     install_button[0].click()
                 if len(continue_button2) > 0:
