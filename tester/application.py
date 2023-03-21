@@ -126,7 +126,7 @@ class DynamicTestingApplication:
             no_result = len(app_controller.highlevel_query.find_by_classname(
                 Widget.TEXT_VIEW, {"text": re.compile("No results for")})) > 0
             if no_result:
-                raise AppNotFoundError
+                raise AppNotFoundError(appId=package_name, device=self.device_udid)
 
             app_controller.delay(3)
             current_time = time.time()
@@ -202,7 +202,7 @@ class DynamicTestingApplication:
             if app_name != 'How ratings are calculated' and app_name != APP_NAME:
                 err = 'cannot find the application'
                 logging.info(f"{app_name} is not {APP_NAME}")
-                raise AppNotFoundError
+                raise AppNotFoundError(appId=package_name, device=self.device_udid)
 
         '''Handle complete account setup'''
         cpas_widget = app_controller.highlevel_query.find_by_classname(
@@ -251,7 +251,7 @@ class DynamicTestingApplication:
             if app_name != 'How ratings are calculated' and app_name != APP_NAME:
                 err = 'cannot find the application'
                 logging.info(f"{app_name} is not {APP_NAME}")
-                raise AppNotFoundError
+                raise AppNotFoundError(appId=package_name, device=self.device_udid)
 
             '''Grant permissions'''
             app_controller.delay(5)
@@ -270,7 +270,7 @@ class DynamicTestingApplication:
                 cantdownload_button = app_controller.highlevel_query.find_by_classname(Widget.TEXT_VIEW, {"text": "Can't download"})
                 if len(cantdownload_button)>0:
                     logging.info("Can't download")
-                    raise DownloadError
+                    raise DownloadError(appId=package_name, device=self.device_udid)
                 if len(install_button) > 0:
                     install_button[0].click()
                 if len(continue_button2) > 0:
@@ -298,7 +298,7 @@ class DynamicTestingApplication:
             paid_button = app_controller.highlevel_query.find_by_classname(
                 Widget.BUTTON, {"text": re.compile("\d+\.\d+")})
             if len(paid_button) > 0:
-                raise PaidAppError
+                raise PaidAppError(appId=package_name, device=self.device_udid)
             logging.warn(
                 "Could not find the install button. The app may be already installed, skipping.")
 
@@ -323,7 +323,7 @@ class DynamicTestingApplication:
             reset_state=True,
             latest_version=None):
         if not self.device_controller.is_online():
-            raise DeviceOfflineError
+            raise DeviceOfflineError(appId=package_name, device=self.device_udid)
 
         self.device_controller.set_wifi_proxy()
 
@@ -336,7 +336,7 @@ class DynamicTestingApplication:
                     apk_path)
 
                 if app_cat == 'games':
-                    raise GamesNotSupportedError
+                    raise GamesNotSupportedError(appId=package_name, device=self.device_udid)
 
                 '''Dump apk'''
                 if dump_apk:
@@ -344,7 +344,7 @@ class DynamicTestingApplication:
                         self.device_controller.dump_apk(
                             apk_path, f"apk/{apk_path}.apk")
                     except:
-                        raise NotSupportedError
+                        raise NotSupportedError(appId=package_name, device=self.device_udid)
 
                     if dump_manifest:
                         manifest = self.device_controller.dump_apk_manifest(
@@ -353,7 +353,7 @@ class DynamicTestingApplication:
                         manifest["category"] = app_cat
 
                         if latest_version and latest_version == manifest["versionName"]:
-                            raise AlreadyTestedError
+                            raise AlreadyTestedError(appId=package_name, device=self.device_udid)
 
                         if not activity:
                             activity = manifest["launchableActivity"]

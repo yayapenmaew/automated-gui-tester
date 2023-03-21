@@ -4,12 +4,14 @@ def storeToRunTestFailDB(appId, device, err):
     tableName = 'run-test-fail-app'
     dynamodb = boto3.resource('dynamodb')
     table = dynamodb.Table(tableName)
+    timestamp = time.time()
+    readableTime = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(timestamp))
     response = table.put_item(
     Item={
         'appId':appId,
         'device':device,
         'err':err,
-        'timestamp': time.time()
+        'timestamp': readableTime
     }
 )
 
@@ -83,14 +85,14 @@ class GamesNotSupportedError(Exception):
 class AppNotFoundError(Exception):
     def __init__(self, appId, device, message="Application not found"):
         self.exit_code = EXIT_CODE.APP_NOT_FOUND_ERROR
+        print(appId, device, message)
         storeToRunTestFailDB(appId, device, message)
         super().__init__(message)
 
 
 class VULPIXAnalyzerError(Exception):
-    def __init__(self, appId, device, message="Error while analyzing the traffic"):
+    def __init__(self, message="Error while analyzing the traffic"):
         self.exit_code = EXIT_CODE.ANALYZER_ERROR
-        storeToRunTestFailDB(appId, device, message)
         super().__init__(message)
 
 

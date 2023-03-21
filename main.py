@@ -154,7 +154,7 @@ if __name__ == '__main__':
 
     time.sleep(10)
     try:
-        score, result = VULPIXAnalyzer.analyze(args.app_id,PI_file_path="PI.json", har_file=f"result-{args.device_name}/{args.app_id}.har")
+        score, result = VULPIXAnalyzer.analyze(args.app_id,args.device_name,PI_file_path="PI.json", har_file=f"result-{args.device_name}/{args.app_id}.har")
     except:
         result_interface.send_error(VULPIXAnalyzerError)
         logging.error(VULPIXAnalyzerError)

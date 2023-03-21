@@ -1,5 +1,3 @@
-import os
-
-#count files in result folder
-dir_path = r'/Users/yayafung/Desktop/automated-gui-tester/result'
-print(len([entry for entry in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, entry))]))
+import time
+timestamp = time.time()
+print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(timestamp)))

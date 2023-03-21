@@ -288,9 +288,10 @@ class VULPIXAnalyzer():
                 VULPIX_score += leaks_by_group[group] / 4 * 25
         return VULPIX_score
 
-    def analyze(package_name, PI_file_path="./analyzer/PI.json", har_file=None):
+    def analyze(package_name, device, PI_file_path="./analyzer/PI", har_file=None):
         logging.info(f"Analyzing traffic of {package_name} from {har_file} ")
         result_dict = dict()
+        PI_file_path=PI_file_path+"-"+device+".json"
 
         for PI_element in PII_TYPE:
             result_dict[PI_element] = 0    
