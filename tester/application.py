@@ -150,26 +150,27 @@ class DynamicTestingApplication:
             '''Skip advertisement and suggestion results'''
             app_list = app_controller.highlevel_query.find_by_classname(
                 Widget.VIEW)
-            print(app_list)
             result_offset = 0
+            countNoDetail = 0
             for app in app_list:
                 app_detail = app.get_attribute('contentDescription')
-                #logging.info(f'135 {app_detail}')
-                if not app_detail:
-                    continue
-                if "App: " in app_detail and "\nAd\n" not in app_detail:
-                    curr_app_name = app_detail.split("\n")[0].replace("App: ","")
-                    isTargetApp = curr_app_name == APP_NAME
-                    if isTargetApp:
-                        break
-                result_offset += 1
+                if app_detail:
+                    if "App: " in app_detail and "\nAd\n" not in app_detail:
+                        curr_app_name = app_detail.split("\n")[0].replace("App: ","")
+                        isTargetApp = curr_app_name == APP_NAME
+                        if isTargetApp:
+                            break
+                    result_offset += 1
+                else:
+                    countNoDetail += 1
 
             result_offset += len(app_controller.highlevel_query.find_by_classname(
                 Widget.TEXT_VIEW, {"text": "Did you mean:"}))
             #logging.info(f'146 {results}')
             #logging.info(f'147 {result_offset}')
             logging.info(f'result_offset = {result_offset}')
-            results[result_offset].click()
+            if countNoDetail != len(app_list): #else all are none --> just click install if have, if do not have --> cannot download
+                results[result_offset].click()
 
        
         app_controller.delay(3)

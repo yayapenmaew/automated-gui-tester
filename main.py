@@ -38,7 +38,7 @@ class RunCmd(threading.Thread):
 
             if result_interface:
                 result_interface.send_error(TimeOutError)
-            raise TimeOutError
+            raise TimeOutError(self.appId,self.device)
         elif self.p.returncode != 0:
             logging.error(f"Tester error with returncode {self.p.returncode}")
             try:

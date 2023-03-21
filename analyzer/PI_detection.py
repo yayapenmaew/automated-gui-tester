@@ -292,6 +292,7 @@ class VULPIXAnalyzer():
         logging.info(f"Analyzing traffic of {package_name} from {har_file} ")
         result_dict = dict()
         PI_file_path=PI_file_path+"-"+device+".json"
+        logging.info(f"295 {PI_file_path}")
 
         for PI_element in PII_TYPE:
             result_dict[PI_element] = 0    
