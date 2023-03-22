@@ -135,6 +135,9 @@ class DynamicTestingApplication:
                 break
 
         if not results:
+            app_list = app_controller.highlevel_query.find_by_classname(
+                Widget.VIEW)
+            logging.info(f"app_list {app_list}")
             resname = app_controller.highlevel_query.find_by_classname(
             Widget.TEXT_VIEW, {"text": APP_NAME })
             logging.info(f"resname {resname}")
@@ -142,10 +145,22 @@ class DynamicTestingApplication:
             if len(resname)>1:
                 resname[0].click()
             else:
+                logging.info(f"len(app_list) {len(app_list)}")
                 app_list = app_controller.highlevel_query.find_by_classname(
                 Widget.VIEW)
                 if len(app_list)>0:
-                    app_list[0].click()
+                    countA = 0
+                    for app in app_list:
+                        logging.info(f"app {app}")
+                        app_detail = app.get_attribute('contentDescription')
+                        logging.info(f"app_detail {app_detail}")
+                        if app_detail:
+                            curr_app_name = app_detail.split("\n")[0].replace("App: ","")
+                            isTargetApp = curr_app_name == APP_NAME
+                            if isTargetApp:
+                                app_list[countA].click()
+                                break
+                        countA += 1
         else:
             '''Skip advertisement and suggestion results'''
             app_list = app_controller.highlevel_query.find_by_classname(
@@ -155,11 +170,10 @@ class DynamicTestingApplication:
             for app in app_list:
                 app_detail = app.get_attribute('contentDescription')
                 if app_detail:
-                    if "App: " in app_detail and "\nAd\n" not in app_detail:
-                        curr_app_name = app_detail.split("\n")[0].replace("App: ","")
-                        isTargetApp = curr_app_name == APP_NAME
-                        if isTargetApp:
-                            break
+                    curr_app_name = app_detail.split("\n")[0].replace("App: ","")
+                    isTargetApp = curr_app_name == APP_NAME
+                    if isTargetApp:
+                        break
                     result_offset += 1
                 else:
                     countNoDetail += 1
