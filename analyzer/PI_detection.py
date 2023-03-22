@@ -291,7 +291,7 @@ class VULPIXAnalyzer():
     def analyze(package_name, device, PI_file_path="./analyzer/PI", har_file=None):
         logging.info(f"Analyzing traffic of {package_name} from {har_file} ")
         result_dict = dict()
-        PI_file_path=PI_file_path+"-"+device+".json"
+        PI_file_path="./analyzer/PI-"+device+".json"
         logging.info(f"295 {PI_file_path}")
 
         for PI_element in PII_TYPE:

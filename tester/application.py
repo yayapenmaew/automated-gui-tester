@@ -324,7 +324,7 @@ class DynamicTestingApplication:
             reset_state=True,
             latest_version=None):
         if not self.device_controller.is_online():
-            raise DeviceOfflineError(appId=package_name, device=self.device_udid)
+            raise DeviceOfflineError(appId=apk_path, device=self.device_udid)
 
         self.device_controller.set_wifi_proxy()
 
@@ -337,7 +337,7 @@ class DynamicTestingApplication:
                     apk_path)
 
                 if app_cat == 'games':
-                    raise GamesNotSupportedError(appId=package_name, device=self.device_udid)
+                    raise GamesNotSupportedError(appId=apk_path, device=self.device_udid)
 
                 '''Dump apk'''
                 if dump_apk:
@@ -345,7 +345,7 @@ class DynamicTestingApplication:
                         self.device_controller.dump_apk(
                             apk_path, f"apk/{apk_path}.apk")
                     except:
-                        raise NotSupportedError(appId=package_name, device=self.device_udid)
+                        raise NotSupportedError(appId=apk_path, device=self.device_udid)
 
                     if dump_manifest:
                         manifest = self.device_controller.dump_apk_manifest(
