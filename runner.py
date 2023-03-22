@@ -2,6 +2,8 @@ import os
 import argparse
 import boto3
 
+from dbMethods import checkIfAlreadyRun
+
 parser = argparse.ArgumentParser()
 parser.add_argument('device_name', metavar='device_name',
                     type=str, help='Device UDID or IP address')
@@ -27,7 +29,7 @@ if __name__ == "__main__":
     # bf5d967c
     # galaxy------ python3 runner.py bf5d967c 192.168.1.192 tech.enjaz.qicardservices com.cv.creator '--appium_port 8201 --proxy_port 8080 --system_port 8200'
     # xiaomi------ python3 runner.py MBH65LJZDALJLZQG 192.168.1.192 com.yalin.babycare	com.hadev.demonslayer.kimetsunoyaibawallpapers '--appium_port 8201 --proxy_port 8080 --system_port 8200'
-    # tablet------ python3 runner.py 01f8ee7c 192.168.1.192 com.league.theleague com.flavionet.android.camera.lite '--appium_port 7201 --proxy_port 7080 --system_port 7200'
+    # tablet------ python3 runner.py 01f8ee7c 192.168.1.192 com.platinumlist com.flavionet.android.camera.lite '--appium_port 7201 --proxy_port 7080 --system_port 7200'
 
     # cu - python3 runner.py bf5d967c 10.202.165.119 com.philo.philo.google com.rotation5.smoresup '--appium_port 8201 --proxy_port 8080 --system_port 8200'
 
@@ -53,7 +55,7 @@ if __name__ == "__main__":
         if appId:
             os.system(f'python3 tester/del.py {deviceName} {appId}') # to delete the previous app in case it is not deleted (time out error)
         appId = item['appId']
-        if appId not in failUrlsDict:
+        if appId not in failUrlsDict and not checkIfAlreadyRun(appId):
             print("App",{count}, "Start from", {exStart},":", {appId})
             #print(f'python3 main.py {deviceName} {appId} {proxyHost} {additionalArg}')
             os.system(f'python3 main.py {deviceName} {appId} {proxyHost} {additionalArg}')

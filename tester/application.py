@@ -1,6 +1,6 @@
 import json
 import os
-from storeTestFailToDb import storeToTestFailDB
+from dbMethods import storeSuccessToDB, storeToTestFailDB
 from .desired_cap import AndroidDesiredCapabilities
 from .device_controller import DeviceController
 from .app_controller import AppController
@@ -384,6 +384,7 @@ class DynamicTestingApplication:
 
             logging.info(
                 f"The application will be started with the activity {activity}")
+            storeSuccessToDB(package_name, self.device_udid)
 
         '''Initialize a proxy server'''
         if proxy:
