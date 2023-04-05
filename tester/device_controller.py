@@ -174,10 +174,10 @@ class DeviceController:
                     launchableActivity = app_activity_search.group(1)
 
         '''Dump app icon'''
-        with zipfile.ZipFile(apk_path) as bundle:
+        """ with zipfile.ZipFile(apk_path) as bundle:
             with bundle.open(appIcon) as icon_image:
                 with open(f"app_icons/{package_name}.png", 'wb') as icon_file:
-                    icon_file.write(icon_image.read())
+                    icon_file.write(icon_image.read()) """
 
         result = {
             "versionName": versionName,
@@ -191,6 +191,6 @@ class DeviceController:
         return result
 
     def get_all_installed_packages(self):
-        packages = subprocess.check_output(f"adb -s {self.device_name} shell 'pm list packages -f' | sed -e 's/.*=//' | sort", shell=True).decode()
+        packages = subprocess.check_output(
+            f"adb -s {self.device_name} shell 'pm list packages -f' | sed -e 's/.*=//' | sort", shell=True).decode()
         return [p.strip() for p in packages.split('\n')]
-

@@ -11,7 +11,7 @@ import time
 import re
 import logging
 from progressbar import progressbar
-from .exceptions import AlreadyTestedError, AppNotFoundError, DeviceOfflineError, DownloadError, GamesNotSupportedError, NotSupportedError, PaidAppError
+from .exceptions import AlreadyTestedError, AppNotFoundError, DeviceOfflineError, DownloadError, GamesNotSupportedError, InstallButtonError, NotSupportedError, PaidAppError
 from .playstore_helper import get_cat_slug
 from google_play_scraper import app as google_play_scraper_app
 
@@ -122,6 +122,7 @@ class DynamicTestingApplication:
             results = app_controller.highlevel_query.find_by_classname(
                 Widget.LINEAR_LAYOUT, {"clickable": True})
             logging.info(f"results {results}")
+            logging.info(f"len results {len(results)}")
 
             no_result = len(app_controller.highlevel_query.find_by_classname(
                 Widget.TEXT_VIEW, {"text": re.compile("No results for")})) > 0
@@ -277,6 +278,10 @@ class DynamicTestingApplication:
                 skip_button2 = app_controller.highlevel_query.find_by_classname(Widget.BUTTON, {"text": "Skip"})
                 install_button = app_controller.highlevel_query.find_by_classname(Widget.BUTTON, {"text": "Install"})
                 cantdownload_button = app_controller.highlevel_query.find_by_classname(Widget.TEXT_VIEW, {"text": "Can't download"})
+                tapToProceed = app_controller.highlevel_query.find_by_classname(
+            Widget.TEXT_VIEW, {"text": 'Tap to proceed' })
+                if len(tapToProceed) > 0:
+                    tapToProceed[0].click()
                 if len(cantdownload_button)>0:
                     logging.info("Can't download")
                     raise DownloadError(appId=package_name, device=self.device_udid)
@@ -310,6 +315,7 @@ class DynamicTestingApplication:
                 raise PaidAppError(appId=package_name, device=self.device_udid)
             logging.warn(
                 "Could not find the install button. The app may be already installed, skipping.")
+            raise InstallButtonError(appId=package_name, device=self.device_udid)
 
         time.sleep(1)
         del app_controller

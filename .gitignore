@@ -6,6 +6,7 @@ log_tester/
 result/
 result-*/
 apk/
+depreciated/
 app_icons/
 app_info/
 benchmark/.gradle

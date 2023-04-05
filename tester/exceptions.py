@@ -29,6 +29,7 @@ class EXIT_CODE:
     BAD_INPUT_ERROR = 40
     ALREADY_TESTED_ERROR = 41
     DOWNLOAD = 43
+    INSTALL_BUTTON = 44
 
 class UnknownError(Exception):
     def __init__(self, message="Unknown error"):
@@ -89,6 +90,13 @@ class AppNotFoundError(Exception):
         storeToRunTestFailDB(appId, device, message)
         super().__init__(message)
 
+class InstallButtonError(Exception):
+    def __init__(self, appId, device, message="Could not find the install button."):
+        self.exit_code = EXIT_CODE.INSTALL_BUTTON
+        print(appId, device, message)
+        storeToRunTestFailDB(appId, device, message)
+        super().__init__(message)
+
 
 class VULPIXAnalyzerError(Exception):
     def __init__(self, message="Error while analyzing the traffic"):
@@ -131,6 +139,7 @@ def resolve_exit_code(exit_code):
         EXIT_CODE.EXTERNAL_INTERFACE_ERROR: ExternalInterfaceError(),
         EXIT_CODE.BAD_INPUT_ERROR: BadInputError(),
         EXIT_CODE.ALREADY_TESTED_ERROR: AlreadyTestedError(),
-        EXIT_CODE.DOWNLOAD: DownloadError()
+        EXIT_CODE.DOWNLOAD: DownloadError(),
+        EXIT_CODE.INSTALL_BUTTON: InstallButtonError()
     }
     return exit_code_mapper[exit_code] if exit_code in exit_code_mapper else None
